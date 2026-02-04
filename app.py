@@ -4,14 +4,57 @@ import json
 import os
 from datetime import date
 from collections import Counter
+from github import Github, GithubException # Yeni kütüphanemiz
 
 # --- AYARLAR ---
-# BURAYI KENDİNE GÖRE DEĞİŞTİR
-YONETICI_SIFRESI = "enver123"  # Arkadaşların bunu bilmeyecek
+# Bu şifre sadece yönetici girişi içindir (Streamlit şifresi değil)
+YONETICI_SIFRESI = "enver123" 
 
 FILE_PLAKALAR = "plaka_data.json"
 FILE_AVCILAR = "avcilar.json"
 PLAKA_SAYISI = 81
+
+# --- GITHUB BAĞLANTISI ---
+# Streamlit Secrets'tan bilgileri çekiyoruz
+try:
+    GITHUB_TOKEN = st.secrets["github"]["token"]
+    REPO_NAME = st.secrets["github"]["repo_name"]
+except:
+    st.error("Lütfen Streamlit Secrets ayarlarını yapın (Token ve Repo adı).")
+    st.stop()
+
+def get_repo():
+    """GitHub deposuna bağlanır."""
+    g = Github(GITHUB_TOKEN)
+    return g.get_repo(REPO_NAME)
+
+def github_read_json(filename):
+    """GitHub'dan JSON dosyasını okur."""
+    try:
+        repo = get_repo()
+        contents = repo.get_contents(filename)
+        return json.loads(contents.decoded_content.decode())
+    except Exception as e:
+        # Dosya yoksa veya hata varsa boş dönebiliriz ama
+        # başlangıçta dosyaları elle yüklediğin için burası çalışmalı.
+        st.error(f"GitHub Okuma Hatası ({filename}): {e}")
+        return None
+
+def github_update_json(filename, new_data, commit_message="Veri Guncelleme"):
+    """GitHub'daki JSON dosyasını günceller."""
+    try:
+        repo = get_repo()
+        contents = repo.get_contents(filename)
+        repo.update_file(
+            path=contents.path,
+            message=commit_message,
+            content=json.dumps(new_data, ensure_ascii=False, indent=4),
+            sha=contents.sha
+        )
+        return True
+    except Exception as e:
+        st.error(f"GitHub Yazma Hatası: {e}")
+        return False
 
 # --- SABİT VERİLER (Şehirler) ---
 TURKIYE_VERISI = {
@@ -111,67 +154,70 @@ def tarihi_duzelt(tarih_str):
             return tarih_str
     return tarih_str
 
-# --- VERİ YÖNETİMİ ---
+# --- VERİ YÖNETİMİ (GITHUB MODU) ---
 def avcilari_yukle():
-    if not os.path.exists(FILE_AVCILAR):
-        bos_veri = []
-        with open(FILE_AVCILAR, "w", encoding="utf-8") as f:
-            json.dump(bos_veri, f, ensure_ascii=False, indent=4)
-        return bos_veri
-    else:
-        try:
-            with open(FILE_AVCILAR, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            return []
+    data = github_read_json(FILE_AVCILAR)
+    if data is None:
+        return [] # Dosya yoksa veya hata varsa boş dön
+    return data
 
 def avcilari_kaydet(liste):
-    with open(FILE_AVCILAR, "w", encoding="utf-8") as f:
-        json.dump(liste, f, ensure_ascii=False, indent=4)
+    success = github_update_json(FILE_AVCILAR, liste, "Avcı listesi güncellendi")
+    if not success:
+        st.error("Avcılar GitHub'a kaydedilemedi!")
 
 def plakalari_yukle():
     bos_yapi = {format_plaka(i): None for i in range(1, PLAKA_SAYISI + 1)}
     
-    if not os.path.exists(FILE_PLAKALAR):
-        with open(FILE_PLAKALAR, "w", encoding="utf-8") as f:
-            json.dump(bos_yapi, f, ensure_ascii=False, indent=4)
-        return bos_yapi
-    else:
-        try:
-            with open(FILE_PLAKALAR, "r", encoding="utf-8") as f:
-                mevcut_veri = json.load(f)
-            if "plakalar" in mevcut_veri: mevcut_veri = mevcut_veri["plakalar"]
+    data = github_read_json(FILE_PLAKALAR)
+    
+    if data is None:
+        return bos_yapi # Dosya yoksa boş yapı dön
+    
+    # Veri temizliği ve formatlama
+    try:
+        if "plakalar" in data: data = data["plakalar"]
+        
+        temizlenmis_veri = bos_yapi.copy()
+        for k, v in data.items():
+            yeni_key = format_plaka(k)
+            if v and "tarih" in v: v["tarih"] = tarihi_duzelt(v["tarih"])
+            temizlenmis_veri[yeni_key] = v
             
-            temizlenmis_veri = bos_yapi.copy()
-            for k, v in mevcut_veri.items():
-                yeni_key = format_plaka(k)
-                if v and "tarih" in v: v["tarih"] = tarihi_duzelt(v["tarih"])
-                temizlenmis_veri[yeni_key] = v
-                
-            plakalari_kaydet(temizlenmis_veri)
-            return temizlenmis_veri
-        except:
-            return bos_yapi
+        return temizlenmis_veri
+    except Exception as e:
+        st.error(f"Veri işleme hatası: {e}")
+        return bos_yapi
 
 def plakalari_kaydet(veri):
-    with open(FILE_PLAKALAR, "w", encoding="utf-8") as f:
-        json.dump(veri, f, ensure_ascii=False, indent=4)
+    success = github_update_json(FILE_PLAKALAR, veri, "Plaka verisi güncellendi")
+    if success:
+        st.toast("Veriler GitHub'a kalıcı olarak kaydedildi! ☁️", icon="✅")
+    else:
+        st.error("Kaydetme başarısız! Token izinlerini kontrol edin.")
+
 
 # --- UYGULAMA BAŞLANGICI ---
 st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
 
-if 'avci_listesi' not in st.session_state: st.session_state['avci_listesi'] = avcilari_yukle()
-st.session_state['plaka_verisi'] = plakalari_yukle() 
+# Session State Yönetimi
+if 'avci_listesi' not in st.session_state:
+    with st.spinner("Veriler GitHub'dan çekiliyor..."):
+        st.session_state['avci_listesi'] = avcilari_yukle()
+
+# Plakaları her seferinde taze çekelim ki senkron olsun
+if 'plaka_verisi' not in st.session_state or st.query_params.get("refresh"):
+     with st.spinner("Plakalar güncelleniyor..."):
+        st.session_state['plaka_verisi'] = plakalari_yukle()
+
 avcilar = st.session_state['avci_listesi']
 plakalar = st.session_state['plaka_verisi']
 
 # --- SIDEBAR: YÖNETİCİ GİRİŞİ ---
 with st.sidebar:
     st.header("🔒 Yönetici Paneli")
-    # Kullanıcı şifreyi girer
     girilen_sifre = st.text_input("Yönetici Şifresi:", type="password")
     
-    # Şifre Doğrulama
     if girilen_sifre == YONETICI_SIFRESI:
         admin_mode = True
         st.success("Yönetici Girişi Aktif ✅")
@@ -195,17 +241,15 @@ with st.sidebar:
         st.info("Veri girişi sadece yöneticiye açıktır.")
 
 # --- ANA EKRAN ---
-st.title("🚙 Plaka Avı (BC Serisi)")
+st.title("🚙 Plaka Avı (BC Serisi) - Online")
 st.markdown("---")
 
-# Eğer Yönetici ise 2 Kolon (Giriş + Rapor), Değilse Tek Kolon (Sadece Rapor)
 if admin_mode:
     col1, col2 = st.columns([1, 2])
 else:
-    # Admin değilse col1'i (giriş kısmını) hiç gösterme, col2'yi (raporu) tam ekran yap
-    col2 = st.container() # Tüm genişliği kaplasın
+    col2 = st.container()
 
-# --- KOLON 1: VERİ GİRİŞİ (SADECE ADMİNE GÖRÜNÜR) ---
+# --- KOLON 1: VERİ GİRİŞİ (ADMİN) ---
 if admin_mode:
     with col1:
         st.subheader("📝 Kayıt Girişi")
@@ -214,10 +258,10 @@ if admin_mode:
         
         if not bos_plakalar:
             st.balloons()
-            st.success("Tüm Türkiye Tamamlandı!")
+            st.success("Tamamlandı!")
         else:
             if not avcilar:
-                st.warning("⚠️ Lütfen soldan avcı ekleyin!")
+                st.warning("⚠️ Avcı ekleyin!")
             else:
                 with st.form("kayit_form"):
                     def liste_gorunumu(plaka_kodu):
@@ -246,7 +290,7 @@ if admin_mode:
                         st.success(f"{tam_plaka_str} başarıyla kaydedildi!")
                         st.rerun()
 
-# --- KOLON 2: RAPORLAR (HERKESE GÖRÜNÜR) ---
+# --- KOLON 2: RAPORLAR ---
 with col2:
     tab1, tab2, tab3 = st.tabs(["🏆 Liderlik & Karne", "🗺️ Bölgesel Durum", "📋 Tüm Liste"])
     
@@ -265,7 +309,6 @@ with col2:
             
             st.markdown("##### 📊 Genel Sıralama")
             st.bar_chart(df_skor.set_index("İsim"), color="#FF4B4B")
-            
             st.divider()
             
             st.markdown("### 🕵️ Avcı Karnesi")
@@ -284,12 +327,11 @@ with col2:
                 
                 if kisi_koleksiyonu:
                     df_kisi = pd.DataFrame(kisi_koleksiyonu)
-                    st.success(f"**{profil_secimi}** toplam **{len(df_kisi)}** adet plaka buldu.")
                     st.dataframe(df_kisi, hide_index=True, use_container_width=True)
                 else:
-                    st.warning("Bu avcının henüz bir kaydı yok.")
+                    st.warning("Kayıt yok.")
         else:
-            st.info("Veri girişi bekleniyor.")
+            st.info("Veri bekleniyor...")
 
     # 2. SEKME: BÖLGESEL
     with tab2:
@@ -309,7 +351,6 @@ with col2:
         
         sahip_text = "Henüz Fethedilmedi 🏳️"
         sahip_renk = "gray"
-        
         if bolge_avcilari:
             counts = Counter(bolge_avcilari)
             max_count = max(counts.values())
@@ -319,32 +360,23 @@ with col2:
                 sahip_text = f"👑 Bölgenin Sahibi: {liderler[0]}"
                 sahip_renk = "green"
             else:
-                liderler_str = ", ".join(liderler)
-                sahip_text = f"⚔️ Bölgenin Sahipleri: {liderler_str}"
+                sahip_text = f"⚔️ Bölgenin Sahipleri: {', '.join(liderler)}"
                 sahip_renk = "orange"
 
         st.markdown(f":{sahip_renk}[**{sahip_text}**]")
-        
         c1, c2 = st.columns(2)
         c1.metric("Toplam İl", f"{toplam_bolge}")
         c2.metric("Bulunan", f"{bulunan_sayisi}")
-        
-        yuzde = bulunan_sayisi / toplam_bolge if toplam_bolge > 0 else 0
-        st.progress(yuzde, text=f"Tamamlanma: %{int(yuzde*100)}")
+        st.progress(bulunan_sayisi / toplam_bolge if toplam_bolge > 0 else 0)
         
         durum_listesi = []
         for p_kodu in bolge_plakalari:
             sehir = TURKIYE_VERISI[p_kodu]["il"]
             detay = plakalar.get(p_kodu)
             if detay:
-                durum_ikon = "✅ Bulundu"
-                tam_plaka = detay['tam_plaka']
-                bulan_kisi = detay['sahibi']
+                durum_listesi.append({"Şehir": sehir, "Durum": "✅ Bulundu", "Plaka Detayı": detay['tam_plaka'], "Avcı": detay['sahibi']})
             else:
-                durum_ikon = "❌"
-                tam_plaka = f"{p_kodu} BC"
-                bulan_kisi = "-"
-            durum_listesi.append({"Şehir": sehir, "Durum": durum_ikon, "Plaka Detayı": tam_plaka, "Avcı": bulan_kisi})
+                durum_listesi.append({"Şehir": sehir, "Durum": "❌", "Plaka Detayı": f"{p_kodu} BC", "Avcı": "-"})
         st.dataframe(pd.DataFrame(durum_listesi), hide_index=True, use_container_width=True)
 
     # 3. SEKME: LİSTE
@@ -353,13 +385,7 @@ with col2:
         for p, d in plakalar.items():
             if d:
                 il_adi = TURKIYE_VERISI.get(p, {}).get("il", "-")
-                dolu_liste.append({
-                    "Plaka Kod": p,
-                    "Tam Plaka": d.get("tam_plaka", f"{p} BC"),
-                    "Şehir": il_adi,
-                    "Bulan": d["sahibi"],
-                    "Tarih": d["tarih"]
-                })
+                dolu_liste.append({"Plaka Kod": p, "Tam Plaka": d.get("tam_plaka", f"{p} BC"), "Şehir": il_adi, "Bulan": d["sahibi"], "Tarih": d["tarih"]})
         if dolu_liste:
             st.dataframe(pd.DataFrame(dolu_liste).sort_values("Plaka Kod"), hide_index=True, use_container_width=True)
         else:
