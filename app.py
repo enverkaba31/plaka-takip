@@ -247,7 +247,7 @@ with st.sidebar:
         admin_mode = False
         st.info("Veri girişi ve madalya yönetimi sadece yöneticiye aittir.")
 
-st.title("🚙 Plaka Avı (BC Serisi)")
+st.title("BC Plaka Avı ")
 st.markdown("---")
 
 if admin_mode: col1, col2 = st.columns([1, 2])
@@ -335,5 +335,6 @@ with col2:
             if d: lst.append({"Kod": p, "Tam Plaka": d["tam_plaka"], "Şehir": TURKIYE_VERISI[p]["il"], "Bulan": d["sahibi"]})
         if lst: st.dataframe(pd.DataFrame(lst), hide_index=True, use_container_width=True)
         else: st.info("Boş.")
+
 
 
