@@ -299,7 +299,7 @@ with col2:
 
     with tab2:
         st.markdown("### 🎖️ Madalya ve Unvan Kataloğu")
-        st.write("Bu rozetler, üstün başarı gösteren avcılara **Game Master (Admin)** tarafından takılır.")
+        st.write("Bu rozetler, üstün başarı gösteren avcılara **NEK** tarafından takılır.")
         st.divider()
         cols = st.columns(2)
         keys = list(tanimlar.keys()) 
@@ -335,4 +335,5 @@ with col2:
             if d: lst.append({"Kod": p, "Tam Plaka": d["tam_plaka"], "Şehir": TURKIYE_VERISI[p]["il"], "Bulan": d["sahibi"]})
         if lst: st.dataframe(pd.DataFrame(lst), hide_index=True, use_container_width=True)
         else: st.info("Boş.")
+
 
