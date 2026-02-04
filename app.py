@@ -241,7 +241,7 @@ with st.sidebar:
         st.info("Veri girişi sadece yöneticiye açıktır.")
 
 # --- ANA EKRAN ---
-st.title("🚙 Plaka Avı (BC Serisi) - Online")
+st.title("BC Mübarek Plaka Avı")
 st.markdown("---")
 
 if admin_mode:
@@ -389,4 +389,5 @@ with col2:
         if dolu_liste:
             st.dataframe(pd.DataFrame(dolu_liste).sort_values("Plaka Kod"), hide_index=True, use_container_width=True)
         else:
+
             st.info("Kayıt yok.")
