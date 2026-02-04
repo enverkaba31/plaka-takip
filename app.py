@@ -11,11 +11,11 @@ YONETICI_SIFRESI = "enver123"
 
 FILE_PLAKALAR = "plaka_data.json"
 FILE_AVCILAR = "avcilar.json"
-FILE_MADALYALAR = "madalyalar.json" # Kimde ne var?
-FILE_TANIMLAR = "madalya_tanimlari.json" # Madalyanın adı ne, ikonu ne?
+FILE_MADALYALAR = "madalyalar.json" 
+FILE_TANIMLAR = "madalya_tanimlari.json" 
 PLAKA_SAYISI = 81
 
-# --- VARSAYILAN KATALOG (Dosya Yoksa Buradan Oluşur) ---
+
 VARSAYILAN_KATALOG = {
     "Metropol Faresi": {"ikon": "🏙️", "desc": "3'ten fazla metropolü (34, 06, 35...) kemiren."},
     "Evliya Çelebi": {"ikon": "🌍", "desc": "Her coğrafi bölgeden (7 Bölge) ganimeti olan."},
@@ -30,7 +30,7 @@ VARSAYILAN_KATALOG = {
     "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."}
 }
 
-# --- GITHUB BAĞLANTISI ---
+# GITHUB BAĞLANTISI
 try:
     GITHUB_TOKEN = st.secrets["github"]["token"]
     REPO_NAME = st.secrets["github"]["repo_name"]
@@ -63,7 +63,6 @@ def github_update_json(filename, new_data, commit_message="Veri Guncelleme"):
         st.error(f"GitHub Hatası: {e}")
         return False
 
-# --- SABİT VERİLER ---
 TURKIYE_VERISI = {
     "01": {"il": "Adana", "bolge": "Akdeniz"}, "02": {"il": "Adıyaman", "bolge": "Güneydoğu Anadolu"},
     "03": {"il": "Afyonkarahisar", "bolge": "Ege"}, "04": {"il": "Ağrı", "bolge": "Doğu Anadolu"},
@@ -128,14 +127,12 @@ def veri_yukle_hepsi():
             
     madalyalar = github_read_json(FILE_MADALYALAR) or {}
     
-    # Madalya Tanımlarını Yükle (Yoksa varsayılanı kullan)
     tanimlar = github_read_json(FILE_TANIMLAR)
     if not tanimlar:
         tanimlar = VARSAYILAN_KATALOG
         
     return avcilar, plakalar, madalyalar, tanimlar
 
-# --- APP BAŞLANGICI ---
 st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
 
 if 'veri_cache' not in st.session_state or st.query_params.get("refresh"):
@@ -151,7 +148,6 @@ plakalar = st.session_state['plakalar']
 madalyalar = st.session_state['madalyalar']
 tanimlar = st.session_state['tanimlar']
 
-# --- SIDEBAR: YÖNETİCİ ---
 with st.sidebar:
     st.header("🔒 Yönetici Paneli")
     if st.text_input("Şifre:", type="password") == YONETICI_SIFRESI:
@@ -159,7 +155,6 @@ with st.sidebar:
         st.success("Admin Girişi ✅")
         st.divider()
         
-        # 1. Avcı Ekleme
         with st.expander("👤 Avcı Yönetimi"):
             yeni_isim = st.text_input("Yeni İsim:")
             if st.button("Ekle", use_container_width=True):
@@ -174,11 +169,9 @@ with st.sidebar:
                     github_update_json(FILE_AVCILAR, avcilar, "Avci silindi")
                     st.rerun()
 
-        # 2. Madalya Düzenleme (YENİ ÖZELLİK)
         with st.expander("🏅 Madalya Editörü"):
             st.caption("Madalya ekle, düzenle veya sil.")
-            
-            # Yeni Ekle veya Düzenle
+    
             islem_tipi = st.radio("İşlem:", ["Düzenle", "Yeni Ekle"], horizontal=True)
             
             if islem_tipi == "Düzenle":
@@ -201,7 +194,7 @@ with st.sidebar:
                             st.warning("Silindi!")
                             st.rerun()
                             
-            else: # Yeni Ekle
+            else: 
                 yeni_isim = st.text_input("Madalya Adı:")
                 yeni_ikon = st.text_input("İkon (Emoji):", value="🏅")
                 yeni_desc = st.text_input("Açıklama:")
@@ -217,7 +210,6 @@ with st.sidebar:
 
         st.divider()
         
-        # 3. Madalya Dağıtma
         with st.expander("🎁 Madalya Dağıtım Ofisi", expanded=True):
             if not avcilar:
                 st.warning("Önce avcı ekleyin.")
@@ -247,7 +239,6 @@ with st.sidebar:
                             
                 st.caption(f"**{hedef_avci}** Sahibinin Rozetleri:")
                 if mevcutlar:
-                    # Sadece tanimlar listesinde hala var olanları göster (silinenler hata vermesin)
                     gecerli_rozetler = [m for m in mevcutlar if m in tanimlar]
                     st.write(", ".join([f"{tanimlar[m]['ikon']} {m}" for m in gecerli_rozetler]))
                 else:
@@ -256,14 +247,12 @@ with st.sidebar:
         admin_mode = False
         st.info("Veri girişi ve madalya yönetimi sadece yöneticiye aittir.")
 
-# --- ANA EKRAN ---
 st.title("🚙 Plaka Avı (BC Serisi)")
 st.markdown("---")
 
 if admin_mode: col1, col2 = st.columns([1, 2])
 else: col2 = st.container()
 
-# --- SOL KOLON ---
 if admin_mode:
     with col1:
         st.subheader("📝 Kayıt Girişi")
@@ -286,9 +275,7 @@ if admin_mode:
                         st.success("Kaydedildi!")
                         st.rerun()
 
-# --- SAĞ KOLON ---
 with col2:
-    # ZAMAN SEKMESİ KALDIRILDI
     tab1, tab2, tab3, tab4 = st.tabs(["🏆 Liderlik & Rozetler", "ℹ️ Madalya Rehberi", "🗺️ Bölge", "📋 Liste"])
     
     with tab1:
@@ -301,7 +288,6 @@ with col2:
             df = df.sort_values("Puan", ascending=False).reset_index(drop=True)
             def rozet_getir(isim):
                 if isim not in madalyalar or not madalyalar[isim]: return ""
-                # Sadece tanimlarda olanları göster
                 return " ".join([tanimlar[m]['ikon'] for m in madalyalar[isim] if m in tanimlar])
             df["Rozetler"] = df["İsim"].apply(rozet_getir)
             st.dataframe(df, hide_index=True, use_container_width=True,
@@ -316,7 +302,7 @@ with col2:
         st.write("Bu rozetler, üstün başarı gösteren avcılara **Game Master (Admin)** tarafından takılır.")
         st.divider()
         cols = st.columns(2)
-        keys = list(tanimlar.keys()) # Artık dinamik listeden çekiyor
+        keys = list(tanimlar.keys()) 
         for i, k in enumerate(keys):
             with cols[i % 2]:
                 ikon = tanimlar[k]['ikon']
@@ -349,3 +335,4 @@ with col2:
             if d: lst.append({"Kod": p, "Tam Plaka": d["tam_plaka"], "Şehir": TURKIYE_VERISI[p]["il"], "Bulan": d["sahibi"]})
         if lst: st.dataframe(pd.DataFrame(lst), hide_index=True, use_container_width=True)
         else: st.info("Boş.")
+
