@@ -1,0 +1,46 @@
+{
+    "Metropol Faresi": {
+        "ikon": "🏙️",
+        "desc": "3'ten fazla metropolün var."
+    },
+    "Evliya Çelebi": {
+        "ikon": "🌍",
+        "desc": "Her coğrafi bölgeden (7 Bölge) ganimeti olan."
+    },
+    "Zoru Siken": {
+        "ikon": "💪",
+        "desc": "Nüfusu 300 binden düşük 5 şehri avlayan."
+    },
+    "Flash": {
+        "ikon": "⚡",
+        "desc": "24 saatte 2 plaka yakalayan hız tutkunu."
+    },
+    "İstanbul'un Sefiri": {
+        "ikon": "🌉",
+        "desc": "34 (İstanbul) plakasını ele geçiren."
+    },
+    "Yağmur Duası": {
+        "ikon": "☔",
+        "desc": "06 (Ankara) plakasını alan."
+    },
+    "Bok Kokusu": {
+        "ikon": "🦨",
+        "desc": "35 (İzmir) plakasını alan."
+    },
+    "Hamsi": {
+        "ikon": "🐟",
+        "desc": "61 (Trabzon) plakasını alan."
+    },
+    "Gökhan'ın Namusu": {
+        "ikon": "🛡️",
+        "desc": "61 (Trabzon) plakasını ele geçiren."
+    },
+    "Nurullah'ın Namusu": {
+        "ikon": "🕊️",
+        "desc": "31 (Hatay) plakasını ele geçiren."
+    },
+    "2002-2018 CHP": {
+        "ikon": "🏖️",
+        "desc": "5'ten fazla sahil şehrine sahip olan."
+    }
+}
