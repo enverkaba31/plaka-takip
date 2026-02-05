@@ -15,8 +15,7 @@ FILE_MADALYALAR = "madalyalar.json"
 FILE_TANIMLAR = "madalya_tanimlari.json"
 PLAKA_SAYISI = 81
 
-# --- HARİTA VERİSİ (İNTERNETTEN ÇEKİLECEK) ---
-# Türkiye İl Sınırları GeoJSON URL'i
+# --- HARİTA VERİSİ ---
 GEOJSON_URL = "https://raw.githubusercontent.com/cihadturhan/tr-geojson/master/geo/tr-cities-utf8.json"
 
 # --- SABİT VERİLER ---
@@ -64,7 +63,6 @@ TURKIYE_VERISI = {
     "81": {"il": "Düzce", "bolge": "Karadeniz"},
 }
 
-# Bölge İsimlerinin Yazılacağı Merkez Koordinatları (Yaklaşık)
 BOLGE_MERKEZLERI = {
     "Marmara": {"lat": 40.2, "lon": 28.0},
     "Ege": {"lat": 38.5, "lon": 28.5},
@@ -75,10 +73,9 @@ BOLGE_MERKEZLERI = {
     "Güneydoğu Anadolu": {"lat": 37.5, "lon": 40.0}
 }
 
-# Avcı Renk Paleti (Sırayla atanır)
 RENK_PALETI = ["#DC143C", "#008000", "#1E90FF", "#FFD700", "#9932CC", "#FF8C00", "#00CED1"]
 
-# --- VARSAYILAN KATALOG ---
+# --- ESKİ (ORİJİNAL) MADALYA LİSTESİ ---
 VARSAYILAN_KATALOG = {
     "Metropol Faresi": {"ikon": "🏙️", "desc": "3'ten fazla metropolü (34, 06, 35...) kemiren."},
     "Evliya Çelebi": {"ikon": "🌍", "desc": "Her coğrafi bölgeden (7 Bölge) ganimeti olan."},
@@ -131,11 +128,13 @@ def format_plaka(no): return f"{int(no):02d}"
 def tarihi_duzelt(t): return t.split("-")[2]+"/"+t.split("-")[1]+"/"+t.split("-")[0] if "-" in t else t
 
 # --- VERİ YÜKLEME ---
-@st.cache_data(ttl=3600) # GeoJSON'u her seferinde çekmesin, önbelleğe alsın
+@st.cache_data(ttl=3600)
 def harita_verisi_cek():
     try:
         r = requests.get(GEOJSON_URL)
-        return r.json()
+        if r.status_code == 200:
+            return r.json()
+        return None
     except:
         return None
 
@@ -153,6 +152,11 @@ def veri_yukle_hepsi():
     madalyalar = github_read_json(FILE_MADALYALAR) or {}
     tanimlar = github_read_json(FILE_TANIMLAR)
     if not tanimlar: tanimlar = VARSAYILAN_KATALOG
+    else: # Yeni kod yüklendiğinde varsayılanları güncelle
+        for k, v in VARSAYILAN_KATALOG.items():
+            if k not in tanimlar:
+                tanimlar[k] = v
+    
     return avcilar, plakalar, madalyalar, tanimlar
 
 # --- APP BAŞLANGICI ---
@@ -262,13 +266,18 @@ if admin_mode:
         else:
             if not avcilar: st.warning("Avcı ekle!")
             else:
+                # --- HATA DÜZELTME: FORM YAPISI (BURASI DÜZELDİ) ---
                 with st.form("kayit"):
                     plaka = st.selectbox("Plaka:", boslar, format_func=lambda x: f"{x} BC ({TURKIYE_VERISI.get(x,{}).get('il','?')})")
                     sonu = st.text_input("Plaka Sonu:", placeholder="123", max_chars=5)
                     notu = st.text_area("Hikayesi (Opsiyonel):", placeholder="Örn: Köprü trafiğinde gördüm...")
                     avci = st.selectbox("Bulan:", avcilar)
                     tarih = st.date_input("Tarih:", value=date.today(), format="DD/MM/YYYY")
-                    if st.form_submit_button("Kaydet ✅"):
+                    
+                    # Buton artık formun içinde ve variable'a atanmış durumda
+                    submitted = st.form_submit_button("Kaydet ✅")
+                    
+                    if submitted:
                         t_fmt = tarih.strftime("%d/%m/%Y")
                         tam = f"{plaka} BC {sonu}" if sonu else f"{plaka} BC"
                         plakalar[plaka] = {"sahibi": avci, "tarih": t_fmt, "tam_plaka": tam, "plaka_sonu": sonu, "not": notu}
@@ -277,7 +286,7 @@ if admin_mode:
                         st.rerun()
 
 with col2:
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita (Yeni)", "ℹ️ Rehber", "🌍 Bölge", "📋 Liste"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "ℹ️ Rehber", "🌍 Bölge", "📋 Liste"])
     
     with tab1:
         skorlar = {isim: 0 for isim in avcilar}
@@ -294,18 +303,16 @@ with col2:
                 column_config={"Puan": st.column_config.ProgressColumn("Skor", format="%d", min_value=0, max_value=81)})
         else: st.info("Veri yok.")
 
-    # --- CHOROPLETH (BOYAMA) HARİTA ---
+    # --- CHOROPLETH HARİTA ---
     with tab2:
         st.subheader("📍 Bölgesel Hakimiyet Haritası")
         
         geojson_data = harita_verisi_cek()
         
         if geojson_data:
-            # 1. Her bölgenin hakimini belirle
-            bolge_hakimleri = {} # {"Akdeniz": "Enver", "Ege": "Eylül"}
+            bolge_hakimleri = {}
             bolge_listesi = set(d["bolge"] for d in TURKIYE_VERISI.values())
             
-            # Renkleri hazırla
             avci_renkleri = {avci: RENK_PALETI[i % len(RENK_PALETI)] for i, avci in enumerate(avcilar)}
             avci_renkleri["Sahipsiz"] = "#808080"
             avci_renkleri["Çekişmeli"] = "#333333"
@@ -326,28 +333,20 @@ with col2:
                     else:
                         bolge_hakimleri[bolge] = "Çekişmeli"
 
-            # 2. Harita verisini (DataFrame) oluştur
-            # Plotly'e "Adana -> Akdeniz -> Enver" zincirini anlatıyoruz
             map_rows = []
             for p_kodu, info in TURKIYE_VERISI.items():
-                il_adi = info["il"]
-                bolge = info["bolge"]
-                hakim = bolge_hakimleri.get(bolge, "Sahipsiz")
-                
                 map_rows.append({
-                    "Plaka": p_kodu,
-                    "İl": il_adi,
-                    "Bölge": bolge,
-                    "Hakim Avcı": hakim
+                    "İl": info["il"],
+                    "Bölge": info["bolge"],
+                    "Hakim Avcı": bolge_hakimleri.get(info["bolge"], "Sahipsiz")
                 })
             
             df_map = pd.DataFrame(map_rows)
 
-            # 3. Haritayı Çiz
             fig = px.choropleth(
                 df_map,
                 geojson=geojson_data,
-                locations="İl", # GeoJSON'daki 'name' ile eşleşecek
+                locations="İl",
                 featureidkey="properties.name",
                 color="Hakim Avcı",
                 color_discrete_map=avci_renkleri,
@@ -358,7 +357,6 @@ with col2:
             fig.update_geos(fitbounds="locations", visible=False)
             fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
             
-            # 4. İsimleri Yaz (Annotation)
             for bolge_adi, koord in BOLGE_MERKEZLERI.items():
                 hakim = bolge_hakimleri.get(bolge_adi, "Sahipsiz")
                 if hakim != "Sahipsiz":
@@ -372,10 +370,9 @@ with col2:
                     )
 
             st.plotly_chart(fig, use_container_width=True)
-            st.caption("ℹ️ Harita, il bazlı değil, **BÖLGE** bazlı boyanır. Bölgeye kim hakimse tüm iller onun rengini alır.")
-            
+            st.caption("ℹ️ Harita BÖLGE bazlı boyanır.")
         else:
-            st.error("Harita verisi indirilemedi. İnternet bağlantısını kontrol edin.")
+            st.error("⚠️ Harita verisi yüklenemedi. İnternet bağlantınızı kontrol edin veya sayfayı yenileyin.")
 
     with tab3:
         st.markdown("### 🎖️ Madalya Kataloğu")
