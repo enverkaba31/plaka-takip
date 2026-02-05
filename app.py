@@ -4,15 +4,15 @@ import requests
 from datetime import date
 from github import Github
 
-# --- MODÜLLERİ İÇERİ AKTAR (BAĞLANTILAR) ---
-# Eğer bu dosyalardan biri eksikse hata vermesin, uyarsın diye try-except koydum.
+# --- MODÜLLERİ İÇERİ AKTAR ---
 try:
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
     from madalyalar import madalya_sayfasi_olustur
     from liste import liste_sayfasi_olustur
+    from radyo import radyo_widget # <-- 1. EKLEME BURAYA
 except ImportError as e:
-    st.error(f"Modül hatası: {e}. Lütfen liderlik.py, harita.py, madalyalar.py ve liste.py dosyalarının oluşturulduğundan emin ol.")
+    st.error(f"Modül hatası: {e}. Dosyaların eksiksiz olduğundan emin ol.")
     st.stop()
 
 # --- GÜVENLİK VE AYARLAR ---
@@ -23,7 +23,7 @@ try:
     REPO_NAME = st.secrets["github"]["repo_name"]
     YONETICI_SIFRESI = st.secrets["admin_password"]
 except:
-    st.error("Lütfen Streamlit Secrets ayarlarını (Token, Repo, Şifre) kontrol edin.")
+    st.error("Lütfen Streamlit Secrets ayarlarını kontrol edin.")
     st.stop()
 
 # --- DOSYA İSİMLERİ ---
@@ -32,14 +32,11 @@ FILE_AVCILAR = "avcilar.json"
 FILE_MADALYALAR = "madalyalar.json"
 FILE_TANIMLAR = "madalya_tanimlari.json"
 
-# --- SABİT VERİLER (SİLME! DİĞER SAYFALAR BUNU KULLANIYOR) ---
+# --- SABİT VERİLER ---
 PLAKA_SAYISI = 81
 GEOJSON_URL = "https://raw.githubusercontent.com/cihadturhan/tr-geojson/master/geo/tr-cities-utf8.json"
-
-# Renk Paleti (Harita İçin)
 RENK_PALETI = ["#DC143C", "#008000", "#1E90FF", "#FFD700", "#9932CC", "#FF8C00", "#00CED1"]
 
-# Bölge Merkezleri (İsim yazdırmak için)
 BOLGE_MERKEZLERI = {
     "Marmara": {"lat": 40.2, "lon": 28.0},
     "Ege": {"lat": 38.5, "lon": 28.5},
@@ -50,7 +47,6 @@ BOLGE_MERKEZLERI = {
     "Güneydoğu Anadolu": {"lat": 37.5, "lon": 40.0}
 }
 
-# 81 İl Verisi
 TURKIYE_VERISI = {
     "01": {"il": "Adana", "bolge": "Akdeniz"}, "02": {"il": "Adıyaman", "bolge": "Güneydoğu Anadolu"},
     "03": {"il": "Afyonkarahisar", "bolge": "Ege"}, "04": {"il": "Ağrı", "bolge": "Doğu Anadolu"},
@@ -95,7 +91,7 @@ TURKIYE_VERISI = {
     "81": {"il": "Düzce", "bolge": "Karadeniz"},
 }
 
-# --- YARDIMCI GITHUB FONKSİYONLARI ---
+# --- YARDIMCI FONKSİYONLAR ---
 def get_repo():
     if not GITHUB_TOKEN: return None
     g = Github(GITHUB_TOKEN)
@@ -124,7 +120,6 @@ def github_update_json(filename, new_data, commit_message="Veri Guncelleme"):
         st.error(f"GitHub Hatası: {e}")
         return False
 
-# --- YARDIMCI FORMAT FONKSİYONLARI ---
 def format_plaka(no): return f"{int(no):02d}"
 def tarihi_duzelt(t): return t.split("-")[2]+"/"+t.split("-")[1]+"/"+t.split("-")[0] if "-" in t else t
 
@@ -132,27 +127,19 @@ def tarihi_duzelt(t): return t.split("-")[2]+"/"+t.split("-")[1]+"/"+t.split("-"
 def veri_yukle_hepsi():
     avcilar = github_read_json(FILE_AVCILAR) or []
     plakalar_raw = github_read_json(FILE_PLAKALAR)
-    
-    # Boş plaka şablonu oluştur
     bos_plaka = {format_plaka(i): None for i in range(1, PLAKA_SAYISI + 1)}
     plakalar = bos_plaka.copy()
-    
-    # GitHub'dan gelen veriyi işle
     if plakalar_raw:
         if "plakalar" in plakalar_raw: plakalar_raw = plakalar_raw["plakalar"]
         for k, v in plakalar_raw.items():
             k_fmt = format_plaka(k)
             if v and "tarih" in v: v["tarih"] = tarihi_duzelt(v["tarih"])
             plakalar[k_fmt] = v
-            
     madalyalar = github_read_json(FILE_MADALYALAR) or {}
     tanimlar = github_read_json(FILE_TANIMLAR) or {}
-    
     return avcilar, plakalar, madalyalar, tanimlar
 
-# --- ANA UYGULAMA MANTIĞI ---
-
-# 1. Verileri Çek ve Cache'e At
+# --- APP BAŞLANGICI ---
 if 'veri_cache' not in st.session_state or st.query_params.get("refresh"):
     with st.spinner("Veriler yükleniyor..."):
         avcilar, plakalar, madalyalar, tanimlar = veri_yukle_hepsi()
@@ -161,35 +148,26 @@ if 'veri_cache' not in st.session_state or st.query_params.get("refresh"):
         st.session_state['madalyalar'] = madalyalar
         st.session_state['tanimlar'] = tanimlar
 
-# Session State'den verileri al
 avcilar = st.session_state['avcilar']
 plakalar = st.session_state['plakalar']
 madalyalar = st.session_state['madalyalar']
 tanimlar = st.session_state['tanimlar']
 
-col_baslik, col_radyo = st.columns([3, 1])
-
-with col_baslik:
-    st.title("🚙 Plaka Avı (BC Serisi)")
-    
-with col_radyo:
-    radyo_widget()
-
+# --- ARAYÜZ ---
+st.title("🚙 Plaka Avı (BC Serisi)")
+radyo_widget() # <-- 2. EKLEME BURASI: Radyoyu burada çağırıyoruz.
 st.markdown("---")
 
-# 2. Layout (Admin Sol, İçerik Sağ)
 admin_mode = False
 col1, col2 = st.columns([1, 3])
 
-# 3. Sidebar (Admin Girişi ve İşlemleri)
+# --- SIDEBAR ---
 with st.sidebar:
     st.header("🔒 Yönetici")
     if st.text_input("Şifre:", type="password") == YONETICI_SIFRESI:
         admin_mode = True
         st.success("Admin: Aktif ✅")
         st.divider()
-        
-        # Avcı Yönetimi
         with st.expander("👤 Avcı Ekle/Sil"):
             yeni_isim = st.text_input("Yeni Avcı:")
             if st.button("Ekle"):
@@ -197,20 +175,16 @@ with st.sidebar:
                     avcilar.append(yeni_isim)
                     github_update_json(FILE_AVCILAR, avcilar, "Avci eklendi")
                     st.rerun()
-            
             if avcilar:
                 sil = st.selectbox("Sil:", avcilar, index=None)
                 if st.button("Sil") and sil:
                     avcilar.remove(sil)
                     github_update_json(FILE_AVCILAR, avcilar, "Avci silindi")
                     st.rerun()
-
-        # Madalya Yönetimi (Dağıtım)
         with st.expander("🏅 Madalya Dağıt"):
             if not avcilar: st.warning("Avcı yok.")
             else:
                 h_avci = st.selectbox("Kime:", avcilar)
-                # Tanımlı madalyaları listele
                 if tanimlar:
                     s_madalya = st.selectbox("Madalya:", list(tanimlar.keys()))
                     c1, c2 = st.columns(2)
@@ -225,10 +199,6 @@ with st.sidebar:
                             madalyalar[h_avci].remove(s_madalya)
                             github_update_json(FILE_MADALYALAR, madalyalar, "Madalya alindi")
                             st.rerun()
-                else:
-                    st.warning("Madalya tanımı yok.")
-
-        # Madalya Tanımlama (Yeni Madalya Ekleme)
         with st.expander("✏️ Madalya Tanımla"):
             y_isim = st.text_input("Madalya Adı:")
             y_ikon = st.text_input("İkon:", value="🏅")
@@ -238,10 +208,8 @@ with st.sidebar:
                     tanimlar[y_isim] = {"ikon": y_ikon, "desc": y_desc}
                     github_update_json(FILE_TANIMLAR, tanimlar, "Madalya tanimi guncellendi")
                     st.rerun()
-    else:
-        st.info("Veri girişi için şifre girin.")
 
-# 4. Sol Kolon: Veri Girişi (Sadece Admin)
+# --- SOL KOLON (KAYIT) ---
 with col1:
     if admin_mode:
         st.subheader("📝 Kayıt")
@@ -257,41 +225,21 @@ with col1:
                     notu = st.text_area("Not:", placeholder="Hikayesi...")
                     avci = st.selectbox("Bulan:", avcilar)
                     tarih = st.date_input("Tarih:", value=date.today())
-                    
                     submitted = st.form_submit_button("Kaydet ✅")
-                    
                     if submitted:
                         t_fmt = tarih.strftime("%d/%m/%Y")
                         tam = f"{plaka} BC {sonu}" if sonu else f"{plaka} BC"
-                        plakalar[plaka] = {
-                            "sahibi": avci, "tarih": t_fmt, 
-                            "tam_plaka": tam, "plaka_sonu": sonu, "not": notu
-                        }
+                        plakalar[plaka] = {"sahibi": avci, "tarih": t_fmt, "tam_plaka": tam, "plaka_sonu": sonu, "not": notu}
                         github_update_json(FILE_PLAKALAR, plakalar, f"{plaka} bulundu")
                         st.success(f"{plaka} Kaydedildi!")
                         st.rerun()
     else:
-        # Admin değilse buraya bir logo veya hoş geldin mesajı koyabiliriz
-        st.image("https://streamlit.io/images/brand/streamlit-mark-color.png", width=100)
-        st.caption("Giriş yapınız.")
+        st.info("Veri girişi için yönetici girişi yapın.")
 
-# 5. Sağ Kolon: Sayfalar (Modüller)
+# --- SAĞ KOLON (MODÜLLER) ---
 with col2:
     tab1, tab2, tab3, tab4 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "🎖️ Madalyalar", "📋 Liste"])
-    
-    with tab1:
-        # Liderlik Modülünü Çağır
-        liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
-        
-    with tab2:
-        # Harita Modülünü Çağır
-        harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
-        
-    with tab3:
-        # Madalya Modülünü Çağır
-        madalya_sayfasi_olustur(tanimlar, madalyalar)
-        
-    with tab4:
-        # Liste Modülünü Çağır
-        liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
-
+    with tab1: liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
+    with tab2: harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
+    with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
+    with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
