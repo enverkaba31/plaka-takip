@@ -7,7 +7,6 @@ from github import Github
 import plotly.express as px
 
 # --- AYARLAR ---
-# Şifreler Streamlit Secrets'tan geliyor
 try:
     GITHUB_TOKEN = st.secrets["github"]["token"]
     REPO_NAME = st.secrets["github"]["repo_name"]
@@ -91,7 +90,18 @@ VARSAYILAN_KATALOG = {
     "Hamsi": {"ikon": "🐟", "desc": "61 (Trabzon) plakasını alan."},
     "Gökhan'ın Namusu": {"ikon": "🛡️", "desc": "61 (Trabzon) plakasını ele geçiren."},
     "Nurullah'ın Namusu": {"ikon": "🕊️", "desc": "31 (Hatay) plakasını ele geçiren."},
-    "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."}
+    "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."},
+    "Şark Görevi": {"ikon": "🪖", "desc": "Doğu'nun en sert illerini (30, 73, 62) toplayan asker."},
+    "Trakya Lordu": {"ikon": "🌻", "desc": "Tekirdağ, Edirne, Kırklareli üçlüsünü 'beya' diyerek toplayan."},
+    "Güneşe Ateş Eden": {"ikon": "🔥", "desc": "01 Adana'yı bulan. Acıya dayanıklı."},
+    "Kutsal Topraklar": {"ikon": "📿", "desc": "Konya (42) ve Urfa (63) ile huzura eren."},
+    "Bayburt Gerçeği": {"ikon": "👻", "desc": "69 Bayburt'u bulup varlığını kanıtlayan."},
+    "Yazlıkçı": {"ikon": "🏖️", "desc": "Muğla (48) ve Antalya (07) ile bronzlaşan."},
+    "Çift Okey": {"ikon": "🎲", "desc": "11, 22, 33... Çift sayı kodlu 3 şehir bulan."},
+    "Plaka Mafyası": {"ikon": "🔫", "desc": "30 plakayı geçip racon kesen."},
+    "Son Durak": {"ikon": "🏁", "desc": "81 Düzce'yi bulup haritayı kapatan."},
+    "Holigan": {"ikon": "🧨", "desc": "Plaka sonu takım tarihi (1903/05/07/67) olanı yakalayan."},
+    "Memur Spec": {"ikon": "💼", "desc": "Ankara, Kırıkkale, Eskişehir üçgenini kuran."}
 }
 
 # --- GITHUB İŞLEMLERİ ---
@@ -127,8 +137,7 @@ def github_update_json(filename, new_data, commit_message="Veri Guncelleme"):
 def format_plaka(no): return f"{int(no):02d}"
 def tarihi_duzelt(t): return t.split("-")[2]+"/"+t.split("-")[1]+"/"+t.split("-")[0] if "-" in t else t
 
-# --- HIZLANDIRMA: HARİTAYI ÖNBELLEĞE AL (CACHE) ---
-# Bu veri değişmediği için 24 saat cache'de tutuyoruz.
+# --- HIZLANDIRMA: HARİTAYI ÖNBELLEĞE AL ---
 @st.cache_data(ttl=86400)
 def harita_verisi_cek():
     try:
@@ -277,7 +286,7 @@ if admin_mode:
                     avci = st.selectbox("Bulan:", avcilar)
                     tarih = st.date_input("Tarih:", value=date.today(), format="DD/MM/YYYY")
                     
-                    # DÜZELTME: Buton formun içinde
+                    # DÜZELTME: Submit butonu formun içine alındı
                     submitted = st.form_submit_button("Kaydet ✅")
                     
                     if submitted:
@@ -292,7 +301,7 @@ if admin_mode:
 with col2:
     tab1, tab2, tab3, tab4 = st.tabs(["🏆 Liderlik", "ℹ️ Rehber", "🌍 Bölge & Harita", "📋 Liste"])
     
-    # 1. LİDERLİK TABLOSU (Tooltip İçin HTML Kullanıyoruz)
+    # 1. LİDERLİK TABLOSU (HTML DÜZELTİLDİ)
     with tab1:
         skorlar = {isim: 0 for isim in avcilar}
         for _, d in plakalar.items():
@@ -301,60 +310,58 @@ with col2:
             df = pd.DataFrame(list(skorlar.items()), columns=["İsim", "Puan"])
             df = df.sort_values("Puan", ascending=False).reset_index(drop=True)
             
-            # DataFrame yerine HTML Tablo oluşturuyoruz (Tooltip için)
-            st.write("##### 📊 Puan Durumu")
-            
-            html_table = """
+            # CSS Stilini ayırıyoruz (Render hatasını önler)
+            st.markdown("""
             <style>
-                table {width: 100%; border-collapse: collapse;}
-                th, td {padding: 10px; text-align: left; border-bottom: 1px solid #444;}
-                tr:hover {background-color: #222;}
-                .tooltip {position: relative; display: inline-block; cursor: pointer; font-size: 22px; margin-right: 5px;}
-                .bar-container {background-color: #444; width: 100%; border-radius: 5px; height: 10px;}
-                .bar {background-color: #ff4b4b; height: 100%; border-radius: 5px;}
+                .custom-table {width: 100%; border-collapse: collapse; font-family: sans-serif;}
+                .custom-table th, .custom-table td {padding: 12px; text-align: left; border-bottom: 1px solid #444;}
+                .custom-table tr:hover {background-color: #262730;}
+                .tooltip {position: relative; display: inline-block; cursor: help; font-size: 20px; margin-right: 8px;}
+                .bar-bg {background-color: #31333F; width: 100%; border-radius: 4px; height: 8px; margin-top: 5px;}
+                .bar-fill {background-color: #FF4B4B; height: 100%; border-radius: 4px;}
             </style>
-            <table>
-                <thead>
-                    <tr style="color: #aaa;"><th>İsim</th><th style="width:40%;">Skor</th><th>Rozetler (Üzerine Gel)</th></tr>
-                </thead>
-                <tbody>
-            """
+            """, unsafe_allow_html=True)
             
+            # Tabloyu oluştur (Girintileri kaldırdık)
+            rows_html = ""
             for index, row in df.iterrows():
                 isim = row['İsim']
                 puan = row['Puan']
                 yuzde = (puan / PLAKA_SAYISI) * 100
                 
-                # Rozetleri hazırla
                 rozetler_html = ""
                 kisi_madalyalar = madalyalar.get(isim, [])
                 for m in kisi_madalyalar:
                     if m in tanimlar:
                         ikon = tanimlar[m]['ikon']
                         desc = tanimlar[m]['desc']
-                        # HTML Tooltip Mantığı (title attribute)
+                        # Tooltip (Title attribute)
                         rozetler_html += f'<span class="tooltip" title="{m}: {desc}">{ikon}</span>'
                 
-                html_table += f"""
+                rows_html += f"""
                 <tr>
-                    <td><strong>{isim}</strong></td>
-                    <td>
+                    <td style="width: 25%;"><strong>{isim}</strong></td>
+                    <td style="width: 40%;">
                         <div style="display: flex; align-items: center;">
-                            <span style="margin-right: 10px;">{puan}</span>
-                            <div class="bar-container">
-                                <div class="bar" style="width: {yuzde}%;"></div>
-                            </div>
+                            <span style="font-weight: bold; margin-right: 10px;">{puan}</span>
+                            <div class="bar-bg"><div class="bar-fill" style="width: {yuzde}%;"></div></div>
                         </div>
                     </td>
                     <td>{rozetler_html}</td>
-                </tr>
-                """
+                </tr>"""
             
-            html_table += "</tbody></table>"
-            st.markdown(html_table, unsafe_allow_html=True)
+            # Tabloyu birleştir ve bas
+            full_table = f"""
+            <table class="custom-table">
+                <thead><tr style="color: #999;"><th>İsim</th><th>Skor</th><th>Rozetler (Üzerine Gel)</th></tr></thead>
+                <tbody>{rows_html}</tbody>
+            </table>
+            """
+            st.markdown(full_table, unsafe_allow_html=True)
             
         else: st.info("Veri yok.")
 
+    # 2. REHBER
     with tab2:
         st.markdown("### 🎖️ Madalya Kataloğu")
         st.divider()
@@ -366,7 +373,7 @@ with col2:
                 aciklama = tanimlar[k]['desc']
                 st.info(f"**{ikon} {k}**\n\n{aciklama}")
 
-    # 3. BÖLGE VE HARİTA (BİRLEŞTİRİLDİ)
+    # 3. BÖLGE VE HARİTA
     with tab3:
         bolgeler = sorted(list(set(d["bolge"] for d in TURKIYE_VERISI.values())))
         secilen = st.selectbox("Bölge:", bolgeler)
@@ -391,7 +398,6 @@ with col2:
         st.divider()
         st.subheader("📍 Türkiye Hakimiyet Haritası")
         
-        # Harita Kodları
         geojson_data = harita_verisi_cek()
         if geojson_data:
             bolge_hakimleri = {}
@@ -431,6 +437,7 @@ with col2:
             st.plotly_chart(fig, use_container_width=True)
         else: st.warning("Harita yükleniyor...")
 
+    # 4. LİSTE
     with tab4:
         lst = []
         for p, d in plakalar.items():
