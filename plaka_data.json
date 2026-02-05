@@ -16,7 +16,13 @@
         "plaka_sonu": "5839"
     },
     "07": null,
-    "08": null,
+    "08": {
+        "sahibi": "Kaan",
+        "tarih": "05/02/2026",
+        "tam_plaka": "08 BC 034",
+        "plaka_sonu": "034",
+        "not": "Ankara'da görüldü. BMW 216D"
+    },
     "09": null,
     "10": null,
     "11": null,
