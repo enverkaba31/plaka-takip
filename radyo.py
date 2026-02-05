@@ -5,97 +5,103 @@ import streamlit.components.v1 as components
 
 def radyo_widget():
     """
-    Radyo modülü (Hata Ayıklama Modu ile)
+    Kalıcı Radyo - Otomatik Başlatma Garantili Versiyon
     """
-    # Klasör isminin tam olarak 'muzik' olduğundan emin ol (küçük harf)
+    # 1. Klasör ve Dosya Kontrolü
     folder_name = "muzik"
-    
-    # Şu anki çalışma dizinini bul (Sunucu nerede çalışıyor?)
     current_dir = os.getcwd()
     target_path = os.path.join(current_dir, folder_name)
 
-    # --- HATA AYIKLAMA (DEBUG) KISMI ---
-    # Eğer klasör yoksa veya içi boşsa bize ipucu ver
-    if not os.path.exists(target_path) or not os.listdir(target_path):
-        with st.expander("⚠️ Radyo Arıza Raporu (Tıkla)", expanded=True):
-            st.error(f"Program '{folder_name}' klasörünü bulamıyor!")
-            st.write(f"📍 **Şu anki Konum:** `{current_dir}`")
-            
-            # Etrafta hangi dosya ve klasörler var?
-            try:
-                dosyalar = os.listdir(current_dir)
-                st.write(f"📂 **Buradaki Dosyalar:** {dosyalar}")
-            except:
-                st.write("Dosya listesi alınamadı.")
-                
-            st.info("""
-            **Çözüm İpuçları:**
-            1. GitHub'da **'muzik'** adında (hepsi küçük harf) bir klasör var mı?
-            2. Bu klasörün içi dolu mu? (Boş klasörleri GitHub görmez!)
-            3. Şarkıların uzantısı .mp3 mü?
-            """)
-        return 
-    # -------------------------------------
-
+    # Klasör yoksa oluştur
+    if not os.path.exists(target_path):
+        os.makedirs(target_path)
+    
     # Şarkıları bul
-    sarkilar = [f for f in os.listdir(target_path) if f.endswith(('.mp3', '.wav', '.ogg'))]
+    try:
+        sarkilar = [f for f in os.listdir(target_path) if f.endswith(('.mp3', '.wav', '.ogg'))]
+    except:
+        sarkilar = []
 
     if not sarkilar:
-        st.warning(f"'{folder_name}' klasörü bulundu ama içi boş veya mp3 yok.")
-        st.write(f"Klasördekiler: {os.listdir(target_path)}")
+        # Eğer şarkı yoksa boş bir alan gösterip çık, hata verme
         return
 
-    # --- RADYO ARAYÜZÜ ---
+    # 2. Arayüz (Şarkı Seçimi)
+    # Burası Streamlit tarafında şarkı seçmek için
+    secilen_sarki = st.selectbox("📻 Radyo Frekansı:", sarkilar, index=0, label_visibility="collapsed")
     
-    # Şarkı Seçimi
-    secilen_sarki = st.selectbox("📻 Frekans:", sarkilar, index=0, label_visibility="collapsed")
-    
-    # Dosya yolu
     file_path = os.path.join(target_path, secilen_sarki)
 
-    # Base64 Çevirme (Müziği tarayıcıya gömmek için)
+    # 3. Dosyayı Oku ve Kodla
     try:
         with open(file_path, "rb") as f:
             data = f.read()
             b64 = base64.b64encode(data).decode()
             mime_type = "audio/mp3"
-    except Exception as e:
-        st.error(f"Dosya okuma hatası: {e}")
+    except:
         return
 
-    # --- JAVASCRIPT OYNATICI ---
+    # 4. JAVASCRIPT OYNATICI (SİHİRLİ KISIM)
     html_code = f"""
     <script>
+        // Oynatıcıyı bul veya yarat
         var audioPlayer = window.parent.document.getElementById("persistent-audio-player");
 
         if (!audioPlayer) {{
             audioPlayer = document.createElement('audio');
             audioPlayer.id = "persistent-audio-player";
             audioPlayer.controls = true;
+            
+            // Görünüm ayarları (Sağ Alt Köşe)
             audioPlayer.style.position = "fixed";
             audioPlayer.style.bottom = "10px";
             audioPlayer.style.right = "10px";
             audioPlayer.style.zIndex = "9999";
-            audioPlayer.style.width = "300px";
+            audioPlayer.style.width = "250px";
+            audioPlayer.style.borderRadius = "20px";
+            audioPlayer.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.5)";
+            
+            // Özellikler
             audioPlayer.autoplay = true;
-            audioPlayer.loop = true; 
+            audioPlayer.loop = true;
+            audioPlayer.volume = 0.5; // Ses seviyesi %50 başlasın (Çok bağırmasın)
+            
             window.parent.document.body.appendChild(audioPlayer);
         }}
 
+        // Şarkı değiştiyse kaynağı güncelle
         var currentSource = audioPlayer.getAttribute("data-source-name");
         var newSourceName = "{secilen_sarki}";
 
         if (currentSource !== newSourceName) {{
             audioPlayer.src = "data:{mime_type};base64,{b64}";
             audioPlayer.setAttribute("data-source-name", newSourceName);
-            var playPromise = audioPlayer.play();
-            if (playPromise !== undefined) {{
-                playPromise.then(_ => {{}}).catch(error => {{
-                    console.log("Otomatik oynatma engellendi.");
-                }});
-            }}
+        }}
+
+        // --- OTOMATİK BAŞLATMA ZORLAYICI ---
+        var playPromise = audioPlayer.play();
+
+        if (playPromise !== undefined) {{
+            playPromise.then(_ => {{
+                // Otomatik başladı, süper!
+                console.log("Müzik başladı.");
+            }}).catch(error => {{
+                // Tarayıcı engelledi! Pusuya yatıyoruz.
+                console.log("Otomatik oynatma engellendi. Tıklama bekleniyor...");
+                
+                // Kullanıcı sayfada HERHANGİ BİR YERE tıkladığı an çalıştır
+                var startAudio = function() {{
+                    audioPlayer.play();
+                    // Bir kere çalıştıktan sonra bu dinleyiciyi kaldır (Tekrar tekrar çalışmasın)
+                    window.parent.document.removeEventListener('click', startAudio);
+                    window.parent.document.removeEventListener('keydown', startAudio);
+                }};
+
+                window.parent.document.addEventListener('click', startAudio);
+                window.parent.document.addEventListener('keydown', startAudio);
+            }});
         }}
     </script>
     """
+    
     components.html(html_code, height=0)
-    st.caption(f"🎵 Çalıyor: {secilen_sarki}")
