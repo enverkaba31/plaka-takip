@@ -7,16 +7,14 @@ from github import Github
 import plotly.express as px
 
 # --- AYARLAR ---
-# Şifreler Streamlit Secrets'tan geliyor, yoksa hata vermemesi için default değerler
+# Şifreler Streamlit Secrets'tan geliyor
 try:
     GITHUB_TOKEN = st.secrets["github"]["token"]
     REPO_NAME = st.secrets["github"]["repo_name"]
     YONETICI_SIFRESI = st.secrets["admin_password"]
 except:
-    # Lokal test için veya secrets yoksa patlamasın
-    GITHUB_TOKEN = ""
-    REPO_NAME = ""
-    YONETICI_SIFRESI = "admin"
+    st.error("Lütfen Streamlit Secrets ayarlarını yapın.")
+    st.stop()
 
 FILE_PLAKALAR = "plaka_data.json"
 FILE_AVCILAR = "avcilar.json"
@@ -93,18 +91,7 @@ VARSAYILAN_KATALOG = {
     "Hamsi": {"ikon": "🐟", "desc": "61 (Trabzon) plakasını alan."},
     "Gökhan'ın Namusu": {"ikon": "🛡️", "desc": "61 (Trabzon) plakasını ele geçiren."},
     "Nurullah'ın Namusu": {"ikon": "🕊️", "desc": "31 (Hatay) plakasını ele geçiren."},
-    "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."},
-    "Şark Görevi": {"ikon": "🪖", "desc": "Doğu'nun en sert illerini (30, 73, 62) toplayan asker."},
-    "Trakya Lordu": {"ikon": "🌻", "desc": "Tekirdağ, Edirne, Kırklareli üçlüsünü 'beya' diyerek toplayan."},
-    "Güneşe Ateş Eden": {"ikon": "🔥", "desc": "01 Adana'yı bulan. Acıya dayanıklı."},
-    "Kutsal Topraklar": {"ikon": "📿", "desc": "Konya (42) ve Urfa (63) ile huzura eren."},
-    "Bayburt Gerçeği": {"ikon": "👻", "desc": "69 Bayburt'u bulup varlığını kanıtlayan."},
-    "Yazlıkçı": {"ikon": "🏖️", "desc": "Muğla (48) ve Antalya (07) ile bronzlaşan."},
-    "Çift Okey": {"ikon": "🎲", "desc": "11, 22, 33... Çift sayı kodlu 3 şehir bulan."},
-    "Plaka Mafyası": {"ikon": "🔫", "desc": "30 plakayı geçip racon kesen."},
-    "Son Durak": {"ikon": "🏁", "desc": "81 Düzce'yi bulup haritayı kapatan."},
-    "Holigan": {"ikon": "🧨", "desc": "Plaka sonu takım tarihi (1903/05/07/67) olanı yakalayan."},
-    "Memur Spec": {"ikon": "💼", "desc": "Ankara, Kırıkkale, Eskişehir üçgenini kuran."}
+    "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."}
 }
 
 # --- GITHUB İŞLEMLERİ ---
