@@ -7,15 +7,22 @@ from github import Github
 import plotly.express as px
 
 # --- AYARLAR ---
-YONETICI_SIFRESI = "enver123" 
+# Şifreler Streamlit Secrets'tan geliyor, yoksa hata vermemesi için default değerler
+try:
+    GITHUB_TOKEN = st.secrets["github"]["token"]
+    REPO_NAME = st.secrets["github"]["repo_name"]
+    YONETICI_SIFRESI = st.secrets["admin_password"]
+except:
+    # Lokal test için veya secrets yoksa patlamasın
+    GITHUB_TOKEN = ""
+    REPO_NAME = ""
+    YONETICI_SIFRESI = "admin"
 
 FILE_PLAKALAR = "plaka_data.json"
 FILE_AVCILAR = "avcilar.json"
 FILE_MADALYALAR = "madalyalar.json"
 FILE_TANIMLAR = "madalya_tanimlari.json"
 PLAKA_SAYISI = 81
-
-# --- HARİTA VERİSİ ---
 GEOJSON_URL = "https://raw.githubusercontent.com/cihadturhan/tr-geojson/master/geo/tr-cities-utf8.json"
 
 # --- SABİT VERİLER ---
@@ -75,7 +82,6 @@ BOLGE_MERKEZLERI = {
 
 RENK_PALETI = ["#DC143C", "#008000", "#1E90FF", "#FFD700", "#9932CC", "#FF8C00", "#00CED1"]
 
-# --- ESKİ (ORİJİNAL) MADALYA LİSTESİ ---
 VARSAYILAN_KATALOG = {
     "Metropol Faresi": {"ikon": "🏙️", "desc": "3'ten fazla metropolü (34, 06, 35...) kemiren."},
     "Evliya Çelebi": {"ikon": "🌍", "desc": "Her coğrafi bölgeden (7 Bölge) ganimeti olan."},
@@ -87,24 +93,30 @@ VARSAYILAN_KATALOG = {
     "Hamsi": {"ikon": "🐟", "desc": "61 (Trabzon) plakasını alan."},
     "Gökhan'ın Namusu": {"ikon": "🛡️", "desc": "61 (Trabzon) plakasını ele geçiren."},
     "Nurullah'ın Namusu": {"ikon": "🕊️", "desc": "31 (Hatay) plakasını ele geçiren."},
-    "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."}
+    "2002-2018 CHP": {"ikon": "🏖️", "desc": "5'ten fazla sahil şehrine sahip olan."},
+    "Şark Görevi": {"ikon": "🪖", "desc": "Doğu'nun en sert illerini (30, 73, 62) toplayan asker."},
+    "Trakya Lordu": {"ikon": "🌻", "desc": "Tekirdağ, Edirne, Kırklareli üçlüsünü 'beya' diyerek toplayan."},
+    "Güneşe Ateş Eden": {"ikon": "🔥", "desc": "01 Adana'yı bulan. Acıya dayanıklı."},
+    "Kutsal Topraklar": {"ikon": "📿", "desc": "Konya (42) ve Urfa (63) ile huzura eren."},
+    "Bayburt Gerçeği": {"ikon": "👻", "desc": "69 Bayburt'u bulup varlığını kanıtlayan."},
+    "Yazlıkçı": {"ikon": "🏖️", "desc": "Muğla (48) ve Antalya (07) ile bronzlaşan."},
+    "Çift Okey": {"ikon": "🎲", "desc": "11, 22, 33... Çift sayı kodlu 3 şehir bulan."},
+    "Plaka Mafyası": {"ikon": "🔫", "desc": "30 plakayı geçip racon kesen."},
+    "Son Durak": {"ikon": "🏁", "desc": "81 Düzce'yi bulup haritayı kapatan."},
+    "Holigan": {"ikon": "🧨", "desc": "Plaka sonu takım tarihi (1903/05/07/67) olanı yakalayan."},
+    "Memur Spec": {"ikon": "💼", "desc": "Ankara, Kırıkkale, Eskişehir üçgenini kuran."}
 }
 
-# --- GITHUB BAĞLANTISI ---
-try:
-    GITHUB_TOKEN = st.secrets["github"]["token"]
-    REPO_NAME = st.secrets["github"]["repo_name"]
-except:
-    st.error("Lütfen Streamlit Secrets ayarlarını yapın.")
-    st.stop()
-
+# --- GITHUB İŞLEMLERİ ---
 def get_repo():
+    if not GITHUB_TOKEN: return None
     g = Github(GITHUB_TOKEN)
     return g.get_repo(REPO_NAME)
 
 def github_read_json(filename):
     try:
         repo = get_repo()
+        if not repo: return None
         contents = repo.get_contents(filename)
         return json.loads(contents.decoded_content.decode())
     except:
@@ -113,6 +125,7 @@ def github_read_json(filename):
 def github_update_json(filename, new_data, commit_message="Veri Guncelleme"):
     try:
         repo = get_repo()
+        if not repo: return False
         try:
             contents = repo.get_contents(filename)
             repo.update_file(contents.path, commit_message, json.dumps(new_data, indent=4, ensure_ascii=False), contents.sha)
@@ -127,8 +140,9 @@ def github_update_json(filename, new_data, commit_message="Veri Guncelleme"):
 def format_plaka(no): return f"{int(no):02d}"
 def tarihi_duzelt(t): return t.split("-")[2]+"/"+t.split("-")[1]+"/"+t.split("-")[0] if "-" in t else t
 
-# --- VERİ YÜKLEME ---
-@st.cache_data(ttl=3600)
+# --- HIZLANDIRMA: HARİTAYI ÖNBELLEĞE AL (CACHE) ---
+# Bu veri değişmediği için 24 saat cache'de tutuyoruz.
+@st.cache_data(ttl=86400)
 def harita_verisi_cek():
     try:
         r = requests.get(GEOJSON_URL)
@@ -138,6 +152,7 @@ def harita_verisi_cek():
     except:
         return None
 
+# --- VERİ YÜKLEME ---
 def veri_yukle_hepsi():
     avcilar = github_read_json(FILE_AVCILAR) or []
     plakalar_raw = github_read_json(FILE_PLAKALAR)
@@ -152,7 +167,7 @@ def veri_yukle_hepsi():
     madalyalar = github_read_json(FILE_MADALYALAR) or {}
     tanimlar = github_read_json(FILE_TANIMLAR)
     if not tanimlar: tanimlar = VARSAYILAN_KATALOG
-    else: # Yeni kod yüklendiğinde varsayılanları güncelle
+    else: 
         for k, v in VARSAYILAN_KATALOG.items():
             if k not in tanimlar:
                 tanimlar[k] = v
@@ -162,8 +177,9 @@ def veri_yukle_hepsi():
 # --- APP BAŞLANGICI ---
 st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
 
+# Verileri Çek
 if 'veri_cache' not in st.session_state or st.query_params.get("refresh"):
-    with st.spinner("Sunucudan veriler çekiliyor..."):
+    with st.spinner("Veriler güncelleniyor..."):
         avcilar, plakalar, madalyalar, tanimlar = veri_yukle_hepsi()
         st.session_state['avcilar'] = avcilar
         st.session_state['plakalar'] = plakalar
@@ -175,7 +191,7 @@ plakalar = st.session_state['plakalar']
 madalyalar = st.session_state['madalyalar']
 tanimlar = st.session_state['tanimlar']
 
-# --- SIDEBAR: YÖNETİCİ ---
+# --- SIDEBAR (ADMİN) ---
 with st.sidebar:
     st.header("🔒 Yönetici Paneli")
     if st.text_input("Şifre:", type="password") == YONETICI_SIFRESI:
@@ -257,6 +273,7 @@ st.markdown("---")
 if admin_mode: col1, col2 = st.columns([1, 2])
 else: col2 = st.container()
 
+# Veri Girişi (Sadece Admin)
 if admin_mode:
     with col1:
         st.subheader("📝 Kayıt Girişi")
@@ -266,7 +283,6 @@ if admin_mode:
         else:
             if not avcilar: st.warning("Avcı ekle!")
             else:
-                # --- HATA DÜZELTME: FORM YAPISI (BURASI DÜZELDİ) ---
                 with st.form("kayit"):
                     plaka = st.selectbox("Plaka:", boslar, format_func=lambda x: f"{x} BC ({TURKIYE_VERISI.get(x,{}).get('il','?')})")
                     sonu = st.text_input("Plaka Sonu:", placeholder="123", max_chars=5)
@@ -274,7 +290,7 @@ if admin_mode:
                     avci = st.selectbox("Bulan:", avcilar)
                     tarih = st.date_input("Tarih:", value=date.today(), format="DD/MM/YYYY")
                     
-                    # Buton artık formun içinde ve variable'a atanmış durumda
+                    # DÜZELTME: Buton formun içinde
                     submitted = st.form_submit_button("Kaydet ✅")
                     
                     if submitted:
@@ -285,9 +301,11 @@ if admin_mode:
                         st.success("Kaydedildi!")
                         st.rerun()
 
+# Raporlar
 with col2:
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "ℹ️ Rehber", "🌍 Bölge", "📋 Liste"])
+    tab1, tab2, tab3, tab4 = st.tabs(["🏆 Liderlik", "ℹ️ Rehber", "🌍 Bölge & Harita", "📋 Liste"])
     
+    # 1. LİDERLİK TABLOSU (Tooltip İçin HTML Kullanıyoruz)
     with tab1:
         skorlar = {isim: 0 for isim in avcilar}
         for _, d in plakalar.items():
@@ -295,86 +313,62 @@ with col2:
         if sum(skorlar.values()) > 0:
             df = pd.DataFrame(list(skorlar.items()), columns=["İsim", "Puan"])
             df = df.sort_values("Puan", ascending=False).reset_index(drop=True)
-            def rozet_getir(isim):
-                if isim not in madalyalar or not madalyalar[isim]: return ""
-                return " ".join([tanimlar[m]['ikon'] for m in madalyalar[isim] if m in tanimlar])
-            df["Rozetler"] = df["İsim"].apply(rozet_getir)
-            st.dataframe(df, hide_index=True, use_container_width=True,
-                column_config={"Puan": st.column_config.ProgressColumn("Skor", format="%d", min_value=0, max_value=81)})
+            
+            # DataFrame yerine HTML Tablo oluşturuyoruz (Tooltip için)
+            st.write("##### 📊 Puan Durumu")
+            
+            html_table = """
+            <style>
+                table {width: 100%; border-collapse: collapse;}
+                th, td {padding: 10px; text-align: left; border-bottom: 1px solid #444;}
+                tr:hover {background-color: #222;}
+                .tooltip {position: relative; display: inline-block; cursor: pointer; font-size: 22px; margin-right: 5px;}
+                .bar-container {background-color: #444; width: 100%; border-radius: 5px; height: 10px;}
+                .bar {background-color: #ff4b4b; height: 100%; border-radius: 5px;}
+            </style>
+            <table>
+                <thead>
+                    <tr style="color: #aaa;"><th>İsim</th><th style="width:40%;">Skor</th><th>Rozetler (Üzerine Gel)</th></tr>
+                </thead>
+                <tbody>
+            """
+            
+            for index, row in df.iterrows():
+                isim = row['İsim']
+                puan = row['Puan']
+                yuzde = (puan / PLAKA_SAYISI) * 100
+                
+                # Rozetleri hazırla
+                rozetler_html = ""
+                kisi_madalyalar = madalyalar.get(isim, [])
+                for m in kisi_madalyalar:
+                    if m in tanimlar:
+                        ikon = tanimlar[m]['ikon']
+                        desc = tanimlar[m]['desc']
+                        # HTML Tooltip Mantığı (title attribute)
+                        rozetler_html += f'<span class="tooltip" title="{m}: {desc}">{ikon}</span>'
+                
+                html_table += f"""
+                <tr>
+                    <td><strong>{isim}</strong></td>
+                    <td>
+                        <div style="display: flex; align-items: center;">
+                            <span style="margin-right: 10px;">{puan}</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: {yuzde}%;"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{rozetler_html}</td>
+                </tr>
+                """
+            
+            html_table += "</tbody></table>"
+            st.markdown(html_table, unsafe_allow_html=True)
+            
         else: st.info("Veri yok.")
 
-    # --- CHOROPLETH HARİTA ---
     with tab2:
-        st.subheader("📍 Bölgesel Hakimiyet Haritası")
-        
-        geojson_data = harita_verisi_cek()
-        
-        if geojson_data:
-            bolge_hakimleri = {}
-            bolge_listesi = set(d["bolge"] for d in TURKIYE_VERISI.values())
-            
-            avci_renkleri = {avci: RENK_PALETI[i % len(RENK_PALETI)] for i, avci in enumerate(avcilar)}
-            avci_renkleri["Sahipsiz"] = "#808080"
-            avci_renkleri["Çekişmeli"] = "#333333"
-
-            for bolge in bolge_listesi:
-                p_list = [k for k, v in TURKIYE_VERISI.items() if v["bolge"] == bolge]
-                bulunan = [p for p in p_list if plakalar[p]]
-                sahipler = [plakalar[p]["sahibi"] for p in bulunan]
-                
-                if not sahipler:
-                    bolge_hakimleri[bolge] = "Sahipsiz"
-                else:
-                    cnt = Counter(sahipler)
-                    mx = max(cnt.values())
-                    liderler = [k for k, v in cnt.items() if v == mx]
-                    if len(liderler) == 1:
-                        bolge_hakimleri[bolge] = liderler[0]
-                    else:
-                        bolge_hakimleri[bolge] = "Çekişmeli"
-
-            map_rows = []
-            for p_kodu, info in TURKIYE_VERISI.items():
-                map_rows.append({
-                    "İl": info["il"],
-                    "Bölge": info["bolge"],
-                    "Hakim Avcı": bolge_hakimleri.get(info["bolge"], "Sahipsiz")
-                })
-            
-            df_map = pd.DataFrame(map_rows)
-
-            fig = px.choropleth(
-                df_map,
-                geojson=geojson_data,
-                locations="İl",
-                featureidkey="properties.name",
-                color="Hakim Avcı",
-                color_discrete_map=avci_renkleri,
-                projection="mercator",
-                hover_data=["Bölge"]
-            )
-            
-            fig.update_geos(fitbounds="locations", visible=False)
-            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-            
-            for bolge_adi, koord in BOLGE_MERKEZLERI.items():
-                hakim = bolge_hakimleri.get(bolge_adi, "Sahipsiz")
-                if hakim != "Sahipsiz":
-                    fig.add_annotation(
-                        x=koord["lon"], y=koord["lat"],
-                        text=hakim,
-                        showarrow=False,
-                        font=dict(family="Arial Black", size=14, color="white"),
-                        bgcolor="rgba(0,0,0,0.5)",
-                        bordercolor="white", borderwidth=1
-                    )
-
-            st.plotly_chart(fig, use_container_width=True)
-            st.caption("ℹ️ Harita BÖLGE bazlı boyanır.")
-        else:
-            st.error("⚠️ Harita verisi yüklenemedi. İnternet bağlantınızı kontrol edin veya sayfayı yenileyin.")
-
-    with tab3:
         st.markdown("### 🎖️ Madalya Kataloğu")
         st.divider()
         cols = st.columns(2)
@@ -385,7 +379,8 @@ with col2:
                 aciklama = tanimlar[k]['desc']
                 st.info(f"**{ikon} {k}**\n\n{aciklama}")
 
-    with tab4:
+    # 3. BÖLGE VE HARİTA (BİRLEŞTİRİLDİ)
+    with tab3:
         bolgeler = sorted(list(set(d["bolge"] for d in TURKIYE_VERISI.values())))
         secilen = st.selectbox("Bölge:", bolgeler)
         p_list = [k for k, v in TURKIYE_VERISI.items() if v["bolge"] == secilen]
@@ -399,13 +394,57 @@ with col2:
             lider_txt = f"👑 {liderler[0]}" if len(liderler)==1 else f"⚔️ {', '.join(liderler)}"
         st.metric("Bölge Hakimi", lider_txt)
         st.progress(len(bulunan)/len(p_list))
+        
         lst = []
         for p in p_list:
             d = plakalar[p]
             lst.append({"Şehir": TURKIYE_VERISI[p]["il"], "Durum": "✅" if d else "❌", "Detay": d["tam_plaka"] if d else "-", "Avcı": d["sahibi"] if d else "-"})
         st.dataframe(pd.DataFrame(lst), hide_index=True, use_container_width=True)
 
-    with tab5:
+        st.divider()
+        st.subheader("📍 Türkiye Hakimiyet Haritası")
+        
+        # Harita Kodları
+        geojson_data = harita_verisi_cek()
+        if geojson_data:
+            bolge_hakimleri = {}
+            bolge_listesi = set(d["bolge"] for d in TURKIYE_VERISI.values())
+            avci_renkleri = {avci: RENK_PALETI[i % len(RENK_PALETI)] for i, avci in enumerate(avcilar)}
+            avci_renkleri["Sahipsiz"] = "#444444"
+            avci_renkleri["Çekişmeli"] = "#222222"
+
+            for bolge in bolge_listesi:
+                p_list_h = [k for k, v in TURKIYE_VERISI.items() if v["bolge"] == bolge]
+                bulunan_h = [p for p in p_list_h if plakalar[p]]
+                sahipler_h = [plakalar[p]["sahibi"] for p in bulunan_h]
+                if not sahipler_h: bolge_hakimleri[bolge] = "Sahipsiz"
+                else:
+                    cnt = Counter(sahipler_h)
+                    mx = max(cnt.values())
+                    lids = [k for k, v in cnt.items() if v == mx]
+                    bolge_hakimleri[bolge] = lids[0] if len(lids) == 1 else "Çekişmeli"
+
+            map_rows = []
+            for p_kodu, info in TURKIYE_VERISI.items():
+                map_rows.append({"İl": info["il"], "Bölge": info["bolge"], "Hakim Avcı": bolge_hakimleri.get(info["bolge"], "Sahipsiz")})
+            
+            fig = px.choropleth(
+                pd.DataFrame(map_rows), geojson=geojson_data, locations="İl", featureidkey="properties.name",
+                color="Hakim Avcı", color_discrete_map=avci_renkleri, projection="mercator", hover_data=["Bölge"]
+            )
+            fig.update_geos(fitbounds="locations", visible=False)
+            fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0}, plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)")
+            
+            for b_adi, krd in BOLGE_MERKEZLERI.items():
+                hkm = bolge_hakimleri.get(b_adi, "Sahipsiz")
+                if hkm != "Sahipsiz":
+                    fig.add_annotation(x=krd["lon"], y=krd["lat"], text=hkm, showarrow=False,
+                        font=dict(family="Arial Black", size=14, color="white"), bgcolor="rgba(0,0,0,0.5)")
+
+            st.plotly_chart(fig, use_container_width=True)
+        else: st.warning("Harita yükleniyor...")
+
+    with tab4:
         lst = []
         for p, d in plakalar.items():
             if d: lst.append({"Kod": p, "Tam Plaka": d["tam_plaka"], "Şehir": TURKIYE_VERISI[p]["il"], "Bulan": d["sahibi"]})
