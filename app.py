@@ -167,7 +167,14 @@ plakalar = st.session_state['plakalar']
 madalyalar = st.session_state['madalyalar']
 tanimlar = st.session_state['tanimlar']
 
-st.title("🚙 Plaka Avı (BC Serisi)")
+col_baslik, col_radyo = st.columns([3, 1])
+
+with col_baslik:
+    st.title("🚙 Plaka Avı (BC Serisi)")
+    
+with col_radyo:
+    radyo_widget()
+
 st.markdown("---")
 
 # 2. Layout (Admin Sol, İçerik Sağ)
@@ -287,3 +294,4 @@ with col2:
     with tab4:
         # Liste Modülünü Çağır
         liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
+
