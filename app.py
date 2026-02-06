@@ -6,8 +6,8 @@ from github import Github
 
 # --- MODÜLLERİ İÇERİ AKTAR ---
 try:
-   try:
-    from animasyon import intro_yap  # <-- ARTIK YENİ DOSYAYI ÇAĞIRIYORUZ
+    # BURAYI DEĞİŞTİRDİK: ARTIK animasyon.py ÇAĞIRILIYOR
+    from animasyon import intro_yap 
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
     from madalyalar import madalya_sayfasi_olustur
@@ -23,9 +23,10 @@ st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
 
 # --- İNTRO (SİTE AÇILINCA ÇALIŞIR) ---
 try:
-    intro_yap() # Artık animasyon.py içindeki fonksiyon çalışacak
+    intro_yap() # animasyon.py içindeki fonksiyon
 except:
     pass
+
 # --- GITHUB BAĞLANTISI ---
 try:
     GITHUB_TOKEN = st.secrets["github"]["token"]
@@ -258,4 +259,3 @@ with col2:
     with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
     with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
     with tab5: etkilesim_sayfasi_olustur()
-
