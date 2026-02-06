@@ -155,7 +155,7 @@ madalyalar = st.session_state['madalyalar']
 tanimlar = st.session_state['tanimlar']
 
 # --- ARAYÜZ ---
-st.title("(☞ﾟヮﾟ)☞ BC PLAKA AVI☜(ﾟヮﾟ☜)")
+st.title("BC PLAKA AVI 👖🐟")
 radyo_widget()
 st.markdown("---")
 
@@ -256,5 +256,6 @@ with col2:
     with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
     with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
     with tab5: etkilesim_sayfasi_olustur()
+
 
 
