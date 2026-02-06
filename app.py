@@ -4,14 +4,15 @@ import requests
 from datetime import date
 from github import Github
 
+# --- MODÜLLERİ İÇERİ AKTAR ---
 try:
-        from intro import intro_yap  # <-- YENİ EKLENEN
+    from intro import intro_yap  # İntro modülü
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
     from madalyalar import madalya_sayfasi_olustur
     from liste import liste_sayfasi_olustur
     from radyo import radyo_widget
-    from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur # <-- YENİ MODÜL
+    from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
 except ImportError as e:
     st.error(f"Modül hatası: {e}. Dosyaların eksiksiz olduğundan emin ol.")
     st.stop()
@@ -19,12 +20,14 @@ except ImportError as e:
 # --- GÜVENLİK VE AYARLAR ---
 st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
 
+# --- İNTRO (SİTE AÇILINCA ÇALIŞIR) ---
 try:
-    from intro import intro_yap
     intro_yap()
-except:
+except Exception as e:
+    # İntro çalışmazsa siteyi bozma, devam et
     pass
 
+# --- GITHUB BAĞLANTISI ---
 try:
     GITHUB_TOKEN = st.secrets["github"]["token"]
     REPO_NAME = st.secrets["github"]["repo_name"]
@@ -217,7 +220,6 @@ with st.sidebar:
                     st.rerun()
 
 # --- SOL KOLON (KAYIT) ---
-# --- SOL KOLON (KAYIT) ---
 with col1:
     if admin_mode:
         st.subheader("📝 Kayıt")
@@ -242,10 +244,8 @@ with col1:
                         st.success(f"{plaka} Kaydedildi!")
                         st.rerun()
     else:
-        # --- LOGO İŞLEMİ BURADA ---
+        # --- LOGO İŞLEMİ ---
         st.info("Veri girişi için yönetici girişi yapın.")
-        
-        # Logoyu buraya koyuyoruz (Admin değilse gözüksün)
         try:
             st.image("fotograflar/bclogo.jpeg", use_container_width=True)
         except:
@@ -253,8 +253,6 @@ with col1:
 
 # --- SAĞ KOLON (MODÜLLER) ---
 with col2:
-    # 5 Sekmeli yapı: Her sekme için ilgili modülü çağırıyoruz
-    # DİKKAT: Buradaki kodlar "with col2:" bloğunun içinde olmalı (girintili)
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "🎖️ Madalyalar", "📋 Liste", "🤝 Görülenler"])
     
     with tab1: liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
@@ -262,7 +260,3 @@ with col2:
     with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
     with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
     with tab5: etkilesim_sayfasi_olustur()
-
-
-
-
