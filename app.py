@@ -6,7 +6,7 @@ from github import Github
 
 # --- 1. AYARLAR & GÜVENLİK ---
 st.set_page_config(
-    page_title="BC İstihbarat Merkezi",
+    page_title="BC Plaka Takip",
     page_icon="🕵️‍♂️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -305,8 +305,8 @@ with col2:
     tab_titles = [
         "🏆 Liderlik", 
         "🗺️ Harita", 
-        "📋 Büyük Liste", 
-        "🤝 Muhbirlik Ağı"
+        "📋 Detaylı Liste", 
+        "🤝 Birbirini En Çok Görenler"
     ]
     
     t1, t2, t3, t4 = st.tabs(tab_titles)
@@ -326,4 +326,5 @@ with col2:
     with t4:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
+
 
