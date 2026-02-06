@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 def etkilesim_sayfasi_olustur():
-    st.markdown("### 🤝 BC Reel'de Birbirini Görenler (Ekim 2025)")
+    st.markdown("### 🤝 BC Reel'de Birbirini Görenler")
     st.caption("Veri Kaynağı: 10.10.2025 Tarihli İstihbarat Raporu")
     
     # 1. VERİ SETİ
@@ -31,7 +31,7 @@ def etkilesim_sayfasi_olustur():
     
     df = pd.DataFrame(data)
 
-    # 2. METRİKLER (GÜNCELLENDİ: Gereksizler silindi)
+    # 2. METRİKLER (Burayı Temizledik, Sadece Lider Var)
     st.metric("🏆 Liderler", "Yaız & Gökan", "9 Kişi")
     
     st.divider()
