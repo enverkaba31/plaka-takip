@@ -211,6 +211,7 @@ with st.sidebar:
                     st.rerun()
 
 # --- SOL KOLON (KAYIT) ---
+# --- SOL KOLON (KAYIT) ---
 with col1:
     if admin_mode:
         st.subheader("📝 Kayıt")
@@ -235,7 +236,14 @@ with col1:
                         st.success(f"{plaka} Kaydedildi!")
                         st.rerun()
     else:
+        # --- LOGO İŞLEMİ BURADA ---
         st.info("Veri girişi için yönetici girişi yapın.")
+        
+        # Logoyu buraya koyuyoruz (Admin değilse gözüksün)
+        try:
+            st.image("fotograflar/bclogo.jpeg", use_container_width=True)
+        except:
+            st.warning("Logo bulunamadı: 'fotograflar/bclogo.jpeg'")
 
 # --- SAĞ KOLON (MODÜLLER) ---
 with col2:
@@ -248,3 +256,4 @@ with col2:
     with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
     with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
     with tab5: etkilesim_sayfasi_olustur()
+
