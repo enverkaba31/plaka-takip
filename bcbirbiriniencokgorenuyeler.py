@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 def etkilesim_sayfasi_olustur():
     st.markdown("### 🤝 BC Reel'de Birbirini Görenler (Ekim 2025)")
-    st.caption("Veri Kaynağı: 10.10.2025 Tarihli İstihbarat Raporu")
+    st.caption("Son Güncelleme: 10.10.2025")
     
     # 1. VERİ SETİ
     data = [
@@ -39,7 +39,7 @@ def etkilesim_sayfasi_olustur():
 
     st.divider()
 
-    # 3. GRAFİK (Bar Chart - Daha Renkli)
+    # 3. GRAFİK (Bar Chart) - Bunu da sabitleyelim
     fig = px.bar(df.sort_values("Skor", ascending=True), 
                  x="Skor", y="Üye", 
                  orientation='h', 
@@ -47,24 +47,28 @@ def etkilesim_sayfasi_olustur():
                  text="Skor",
                  color="Skor",
                  color_continuous_scale="Reds")
-    fig.update_layout(showlegend=False, height=600)
-    st.plotly_chart(fig, use_container_width=True)
+    
+    # Bar grafiği kilitleme ayarları
+    fig.update_layout(
+        showlegend=False, 
+        height=600,
+        dragmode=False, # Sürüklemeyi kapat
+        xaxis=dict(fixedrange=True), # Sağa sola kaymayı kapat
+        yaxis=dict(fixedrange=True)  # Yukarı aşağı kaymayı kapat
+    )
+    
+    # Config ile zoom menüsünü gizle
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
 
     st.divider()
 
-    # 4. KİM KİMİ GÖRDÜ MATRİSİ (REVİZE EDİLDİ)
+    # 4. KİM KİMİ GÖRDÜ MATRİSİ (GRID)
     st.subheader("🕵️ Kim Kimi Gördü Matrisi")
     
-    # Tüm üyelerin listesi
     tum_uyeler = sorted([d["Üye"] for d in data])
     
-    # Matris verisini sayısal olarak hazırla
-    # 0: Görmedi (Koyu Gri)
-    # 1: Gördü (Yeşil)
-    # 0.2: Kendisi (Boşluk/Siyah)
-    
     z_values = []
-    text_values = [] # Üzerine gelince yazacak yazı
+    text_values = [] 
     
     for row_person in data:
         z_row = []
@@ -74,20 +78,18 @@ def etkilesim_sayfasi_olustur():
         
         for col_person in tum_uyeler:
             if sahip == col_person:
-                z_row.append(0.2) # Kendisi
+                z_row.append(0.2) 
                 text_row.append("Kendisi")
             elif col_person in gordukleri:
-                z_row.append(1) # Gördü
+                z_row.append(1) 
                 text_row.append(f"{sahip} -> {col_person} GÖRDÜ")
             else:
-                z_row.append(0) # Görmedi
+                z_row.append(0) 
                 text_row.append("Görmedi")
         
         z_values.append(z_row)
         text_values.append(text_row)
         
-    # Heatmap Çiz (Custom Colors)
-    # Renk Skalası: 0 -> Koyu Gri, 0.2 -> Siyah, 1 -> Yeşil
     colorscale = [
         [0.0, 'rgb(40, 40, 40)'],   # Görmedi (Koyu Gri)
         [0.2, 'rgb(0, 0, 0)'],      # Kendisi (Siyah)
@@ -101,27 +103,45 @@ def etkilesim_sayfasi_olustur():
         text=text_values,
         hoverinfo="text",
         colorscale=colorscale,
-        showscale=False, # Yandaki renk çubuğunu gizle
-        xgap=1, # Kutucuklar arası boşluk (X ekseni)
-        ygap=1  # Kutucuklar arası boşluk (Y ekseni)
+        showscale=False,
+        xgap=1,
+        ygap=1
     ))
 
     fig_matrix.update_layout(
         title="Etkileşim Grid'i",
-        xaxis_nticks=len(tum_uyeler), # Tüm isimleri göster
-        yaxis_nticks=len(data),       # Tüm isimleri göster
+        xaxis_nticks=len(tum_uyeler),
+        yaxis_nticks=len(data),
         width=800,
         height=800,
-        xaxis_side="top", # İsimleri yukarı al (daha rahat okunur)
+        xaxis_side="top",
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(tickangle=-45) # İsimleri biraz eğik yaz sığsın
+        
+        # --- KİLİTLEME AYARLARI BURADA ---
+        dragmode=False, # Mouse ile tut sürükleyi kapat
+        xaxis=dict(
+            tickangle=-45,
+            fixedrange=True # X eksenini kilitle (Zoom yok)
+        ),
+        yaxis=dict(
+            fixedrange=True # Y eksenini kilitle (Zoom yok)
+        )
     )
     
-    st.plotly_chart(fig_matrix, use_container_width=True)
+    # Config parametresi ile ekstra güvenlik (ModeBar gizle, Scroll Zoom kapa)
+    st.plotly_chart(
+        fig_matrix, 
+        use_container_width=True, 
+        config={
+            'displayModeBar': False, # Sağ üstteki ikonları gizle
+            'scrollZoom': False,     # Mouse tekerleğiyle zoomu kapat
+            'doubleClick': 'reset',  # Çift tıklayınca resetle (zaten zoom yok ama olsun)
+            'showTips': False
+        }
+    )
 
-    # 5. DETAYLI TABLO (Genişletilebilir)
+    # 5. DETAYLI TABLO
     with st.expander("📋 Detaylı Listeyi Gör"):
-        # Tabloyu daha şık hale getirelim
         formatted_df = df.copy()
         formatted_df["Gördükleri"] = formatted_df["Gördükleri"].apply(lambda x: ", ".join(x) if x else "-")
         st.dataframe(formatted_df, use_container_width=True)
