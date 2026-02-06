@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 def etkilesim_sayfasi_olustur():
     st.markdown("### 🤝 BC Reel'de Birbirini Görenler (Ekim 2025)")
-    st.caption("Son Güncelleme: 10.10.2025")
+    st.caption("Veri Kaynağı: 10.10.2025 Tarihli İstihbarat Raporu")
     
     # 1. VERİ SETİ
     data = [
@@ -31,12 +31,12 @@ def etkilesim_sayfasi_olustur():
     
     df = pd.DataFrame(data)
 
-    # 2. METRİKLER
-    c1= st.columns(1)
-    c1.metric("Liderler", "Yaız & Gökan", "9 Kişi")
+    # 2. METRİKLER (GÜNCELLENDİ: Gereksizler silindi)
+    st.metric("🏆 Liderler", "Yaız & Gökan", "9 Kişi")
+    
     st.divider()
 
-    # 3. GRAFİK (Bar Chart) - Bunu da sabitleyelim
+    # 3. GRAFİK (Bar Chart) - Sabit
     fig = px.bar(df.sort_values("Skor", ascending=True), 
                  x="Skor", y="Üye", 
                  orientation='h', 
@@ -45,21 +45,19 @@ def etkilesim_sayfasi_olustur():
                  color="Skor",
                  color_continuous_scale="Reds")
     
-    # Bar grafiği kilitleme ayarları
     fig.update_layout(
         showlegend=False, 
         height=600,
-        dragmode=False, # Sürüklemeyi kapat
-        xaxis=dict(fixedrange=True), # Sağa sola kaymayı kapat
-        yaxis=dict(fixedrange=True)  # Yukarı aşağı kaymayı kapat
+        dragmode=False, 
+        xaxis=dict(fixedrange=True), 
+        yaxis=dict(fixedrange=True)
     )
     
-    # Config ile zoom menüsünü gizle
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False, 'scrollZoom': False})
 
     st.divider()
 
-    # 4. KİM KİMİ GÖRDÜ MATRİSİ (GRID)
+    # 4. KİM KİMİ GÖRDÜ MATRİSİ (GRID) - Sabit
     st.subheader("🕵️ Kim Kimi Gördü Matrisi")
     
     tum_uyeler = sorted([d["Üye"] for d in data])
@@ -113,26 +111,18 @@ def etkilesim_sayfasi_olustur():
         height=800,
         xaxis_side="top",
         plot_bgcolor='rgba(0,0,0,0)',
-        
-        # --- KİLİTLEME AYARLARI BURADA ---
-        dragmode=False, # Mouse ile tut sürükleyi kapat
-        xaxis=dict(
-            tickangle=-45,
-            fixedrange=True # X eksenini kilitle (Zoom yok)
-        ),
-        yaxis=dict(
-            fixedrange=True # Y eksenini kilitle (Zoom yok)
-        )
+        dragmode=False, 
+        xaxis=dict(tickangle=-45, fixedrange=True),
+        yaxis=dict(fixedrange=True)
     )
     
-    # Config parametresi ile ekstra güvenlik (ModeBar gizle, Scroll Zoom kapa)
     st.plotly_chart(
         fig_matrix, 
         use_container_width=True, 
         config={
-            'displayModeBar': False, # Sağ üstteki ikonları gizle
-            'scrollZoom': False,     # Mouse tekerleğiyle zoomu kapat
-            'doubleClick': 'reset',  # Çift tıklayınca resetle (zaten zoom yok ama olsun)
+            'displayModeBar': False, 
+            'scrollZoom': False,     
+            'doubleClick': 'reset', 
             'showTips': False
         }
     )
