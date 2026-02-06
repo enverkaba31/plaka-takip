@@ -5,7 +5,6 @@ import plotly.graph_objects as go
 
 def etkilesim_sayfasi_olustur():
     st.markdown("### 🤝 BC Reel'de Birbirini Görenler")
-    st.caption("Veri Kaynağı: 10.10.2025 Tarihli İstihbarat Raporu")
     
     # 1. VERİ SETİ
     data = [
