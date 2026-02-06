@@ -32,11 +32,8 @@ def etkilesim_sayfasi_olustur():
     df = pd.DataFrame(data)
 
     # 2. METRİKLER
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Toplam Buluşma", "66+") 
-    c2.metric("Liderler", "Yaız & Gökan", "9 Kişi")
-    c3.metric("Ayın En Sosyali", "Yaız Abi")
-
+    c1= st.columns(1)
+    c1.metric("Liderler", "Yaız & Gökan", "9 Kişi")
     st.divider()
 
     # 3. GRAFİK (Bar Chart) - Bunu da sabitleyelim
