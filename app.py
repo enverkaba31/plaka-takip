@@ -10,7 +10,8 @@ try:
     from harita import harita_sayfasi_olustur
     from madalyalar import madalya_sayfasi_olustur
     from liste import liste_sayfasi_olustur
-    from radyo import radyo_widget # <-- 1. EKLEME BURAYA
+    from radyo import radyo_widget
+    from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
 except ImportError as e:
     st.error(f"Modül hatası: {e}. Dosyaların eksiksiz olduğundan emin ol.")
     st.stop()
@@ -238,8 +239,11 @@ with col1:
 
 # --- SAĞ KOLON (MODÜLLER) ---
 with col2:
-    tab1, tab2, tab3, tab4 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "🎖️ Madalyalar", "📋 Liste"])
-    with tab1: liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
-    with tab2: harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
-    with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
-    with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
+# 5 Sekmeli yapıya geçiyoruz
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "🎖️ Madalyalar", "📋 Liste", "🤝 Görülenler"])
+
+with tab1: liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
+with tab2: harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
+with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
+with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
+with tab5: etkilesim_sayfasi_olustur()
