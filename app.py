@@ -188,8 +188,8 @@ else:
 
 # --- 8. ANA ARAYÜZ (LAYOUT) ---
 
-st.title("BC İSTİHBARAT MERKEZİ 🕵️‍♂️")
-st.caption("Plaka Takip & Operasyon Yönetim Sistemi v3.0")
+st.title("B.C. Boş İşler Müdürlüğü 🕵️‍♂️")
+st.caption("Plaka Avı Sistemi")
 st.divider()
 
 col1, col2 = st.columns([1, 3], gap="medium")
@@ -248,13 +248,13 @@ with col1:
     kalan_sayisi = PLAKA_SAYISI - bulunan_sayisi
     ilerleme = bulunan_sayisi / PLAKA_SAYISI
     
-    st.metric(label="🎯 Toplam İnfaz (Bulunan)", value=bulunan_sayisi, delta=f"Kalan: {kalan_sayisi}")
+    st.metric(label="🎯 Bulunan Plakalar", value=bulunan_sayisi, delta=f"Kalan: {kalan_sayisi}")
     st.progress(ilerleme)
     
     st.divider()
 
     if admin_mode:
-        st.subheader("📝 Operasyon Kaydı")
+        st.subheader("📝 Plaka Kaydı")
         boslar = sorted([p for p, d in plakalar.items() if d is None])
         
         if not boslar:
@@ -267,11 +267,11 @@ with col1:
                 with st.form("kayit_formu", border=True):
                     secilen_plaka = st.selectbox("Hedef Plaka:", boslar, format_func=lambda x: f"{x} - {TURKIYE_VERISI.get(x,{}).get('il','?')}")
                     sonu = st.text_input("Plaka Sonu (Opsiyonel):", placeholder="Örn: 1907")
-                    notu = st.text_area("İstihbarat Notu:", placeholder="Nerede görüldü? Hikayesi ne?")
-                    avci = st.selectbox("Operasyonu Yapan:", avcilar)
-                    tarih = st.date_input("Operasyon Tarihi:", value=date.today())
+                    notu = st.text_area("Not:", placeholder="Nerede görüldü? Hikayesi ne?")
+                    avci = st.selectbox("Bulan:", avcilar)
+                    tarih = st.date_input("Bulma Tarihi:", value=date.today())
                     
-                    if st.form_submit_button("HEDEFİ İNDİR 🔫"):
+                    if st.form_submit_button("Plakayı Avla 🔫"):
                         t_fmt = tarih.strftime("%d/%m/%Y")
                         tam = f"{secilen_plaka} BC {sonu}" if sonu else f"{secilen_plaka} BC"
                         
@@ -326,3 +326,4 @@ with col2:
     with t4:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
+
