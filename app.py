@@ -4,7 +4,7 @@ import random
 from datetime import date
 from github import Github
 
-# --- 1. AYARLAR & GÜVENLİK (EN BAŞTA) ---
+# --- 1. AYARLAR & GÜVENLİK ---
 st.set_page_config(
     page_title="BC İstihbarat Merkezi",
     page_icon="🕵️‍♂️",
@@ -12,15 +12,15 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- 2. MODÜLLERİ ÇAĞIR (ZIRHLI IMPORT) ---
+# --- 2. MODÜLLERİ ÇAĞIR ---
 try:
     from animasyon import intro_yap  
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
-    from madalyalar import madalya_sayfasi_olustur
     from liste import liste_sayfasi_olustur
     from radyo import radyo_widget
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
+    # Madalya sayfası modülü artık çağrılmıyor
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
     st.stop()
@@ -28,12 +28,7 @@ except ImportError as e:
 # --- 3. GÖRSEL ŞÖLEN (CUSTOM CSS) ---
 st.markdown("""
 <style>
-    /* Ana Arka Plan Ayarları */
-    .stApp {
-        background-color: #0e1117;
-    }
-    
-    /* Başlık Stili */
+    .stApp { background-color: #0e1117; }
     h1 {
         background: -webkit-linear-gradient(45deg, #FF4B4B, #FFD700);
         -webkit-background-clip: text;
@@ -41,48 +36,27 @@ st.markdown("""
         font-family: 'Arial Black', sans-serif;
         text-shadow: 0px 0px 20px rgba(255, 75, 75, 0.5);
     }
-    
-    /* Metrik Kutuları */
     div[data-testid="stMetric"] {
-        background-color: #1E1E1E;
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #333;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        background-color: #1E1E1E; padding: 15px; border-radius: 10px;
+        border: 1px solid #333; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
-    
-    /* Tab Tasarımı */
-    button[data-baseweb="tab"] {
-        font-size: 18px;
-        font-weight: bold;
-    }
-    
-    /* Butonlar */
     .stButton>button {
-        width: 100%;
-        border-radius: 20px;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        width: 100%; border-radius: 20px; font-weight: bold; transition: all 0.3s ease;
     }
     .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 15px rgba(255, 75, 75, 0.5);
+        transform: scale(1.02); box-shadow: 0 0 15px rgba(255, 75, 75, 0.5);
     }
-    
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background-image: linear-gradient(#1A1A1A, #0E0E0E);
-    }
+    [data-testid="stSidebar"] { background-image: linear-gradient(#1A1A1A, #0E0E0E); }
 </style>
 """, unsafe_allow_html=True)
 
 # --- 4. İNTRO & RADYO ---
 try:
-    intro_yap() # Animasyon
+    intro_yap() 
 except:
     pass
 
-radyo_widget() # Müzik Kutusu
+radyo_widget()
 
 # --- 5. VERİ BAĞLANTILARI ---
 try:
@@ -182,7 +156,7 @@ def github_update_json(filename, new_data, commit_message="Operasyon Kaydı"):
 
 def format_plaka(no): return f"{int(no):02d}"
 
-# --- 7. VERİLERİ YÜKLE (CACHE MEKANİZMASI) ---
+# --- 7. VERİLERİ YÜKLE ---
 def veri_yukle():
     avcilar = github_read_json(FILES["avci"]) or []
     plakalar_raw = github_read_json(FILES["plaka"])
@@ -218,30 +192,18 @@ st.title("BC İSTİHBARAT MERKEZİ 🕵️‍♂️")
 st.caption("Plaka Takip & Operasyon Yönetim Sistemi v3.0")
 st.divider()
 
-# Layout: Sol (Bilgi/Logo) - Sağ (Tablar)
 col1, col2 = st.columns([1, 3], gap="medium")
 
-# --- SIDEBAR: KAPTAN KÖŞKÜ ---
+# --- SIDEBAR: YÖNETİCİ PANELİ ---
 admin_mode = False
 with st.sidebar:
-    st.header("🚢 Kaptan Köşkü")
-    
-    # Racon Sözü
-    racon_sozler = [
-        "Kurtlar vadisinde iz sürmek bizim işimiz.", 
-        "Plaka plaka gezeriz, hedefi affetmeyiz.",
-        "Mesele plaka değil yeğen, mesele kardeşlik.",
-        "Azdan az, çoktan çok gider.",
-        "Operasyon biter, dostluk baki kalır."
-    ]
-    st.info(f"💡 **Günün Sözü:**\n{random.choice(racon_sozler)}")
-    
-    st.divider()
+    st.header("🔒 Yönetici Paneli")
     
     # Giriş Paneli
     if st.text_input("🔑 Erişim Şifresi:", type="password") == YONETICI_SIFRESI:
         admin_mode = True
         st.success("YETKİ VERİLDİ: ADMIN")
+        st.divider()
         
         # Admin İşlemleri
         with st.expander("👤 Personel İşleri"):
@@ -258,7 +220,8 @@ with st.sidebar:
                 github_update_json(FILES["avci"], avcilar, "Ajan silindi")
                 st.rerun()
 
-        with st.expander("🎖️ Madalya Töreni"):
+        # Madalya verme yetkisi burada durabilir ama sekme kaldırıldı
+        with st.expander("🎖️ Madalya Dağıtım"):
             if avcilar:
                 kime = st.selectbox("Kime:", avcilar)
                 ne = st.selectbox("Ne:", list(tanimlar.keys()) if tanimlar else [])
@@ -275,17 +238,8 @@ with st.sidebar:
                         madalyalar[kime].remove(ne)
                         github_update_json(FILES["madalya"], madalyalar)
                         st.rerun()
-
-        with st.expander("📝 Yeni Madalya Tasarla"):
-            m_ad = st.text_input("İsim:")
-            m_ikon = st.text_input("Emoji:")
-            m_desc = st.text_input("Açıklama:")
-            if st.button("Envantere Ekle"):
-                tanimlar[m_ad] = {"ikon": m_ikon, "desc": m_desc}
-                github_update_json(FILES["tanim"], tanimlar)
-                st.rerun()
     else:
-        st.warning("Misafir Girişi")
+        st.info("Sadece yetkili personel.")
 
 # --- SOL KOLON (OPERASYON & LOGO) ---
 with col1:
@@ -332,6 +286,7 @@ with col1:
                         if github_update_json(FILES["plaka"], plakalar, f"{secilen_plaka} bulundu"):
                             st.success(f"Tebrikler {avci}! {secilen_plaka} plakası düştü! 🔥")
                             st.balloons()
+                            import time
                             time.sleep(2)
                             st.rerun()
                         else:
@@ -346,16 +301,15 @@ with col1:
 
 # --- SAĞ KOLON (VERİ MERKEZİ) ---
 with col2:
-    # 5 Sekmeli Dev Yapı
+    # 4 Sekmeli Yapı (Madalyalar Kaldırıldı)
     tab_titles = [
         "🏆 Liderlik", 
         "🗺️ Harita", 
-        "🎖️ Madalyalar", 
         "📋 Büyük Liste", 
         "🤝 Muhbirlik Ağı"
     ]
     
-    t1, t2, t3, t4, t5 = st.tabs(tab_titles)
+    t1, t2, t3, t4 = st.tabs(tab_titles)
     
     with t1:
         st.markdown("### 📊 Anlık Puan Durumu")
@@ -366,13 +320,9 @@ with col2:
         harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
         
     with t3:
-        st.markdown("### 🎖️ Onur Köşesi")
-        madalya_sayfasi_olustur(tanimlar, madalyalar)
-        
-    with t4:
         st.markdown("### 📋 Veri Dökümü")
         liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
         
-    with t5:
+    with t4:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
