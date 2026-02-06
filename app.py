@@ -6,7 +6,7 @@ from github import Github
 
 # --- MODÜLLERİ İÇERİ AKTAR ---
 try:
-    from intro import intro_yap  # İntro modülü
+    from intro import intro_yap  # Girinti düzeltildi
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
     from madalyalar import madalya_sayfasi_olustur
@@ -24,7 +24,6 @@ st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
 try:
     intro_yap()
 except Exception as e:
-    # İntro çalışmazsa siteyi bozma, devam et
     pass
 
 # --- GITHUB BAĞLANTISI ---
@@ -244,7 +243,6 @@ with col1:
                         st.success(f"{plaka} Kaydedildi!")
                         st.rerun()
     else:
-        # --- LOGO İŞLEMİ ---
         st.info("Veri girişi için yönetici girişi yapın.")
         try:
             st.image("fotograflar/bclogo.jpeg", use_container_width=True)
