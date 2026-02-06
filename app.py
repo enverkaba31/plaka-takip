@@ -11,7 +11,7 @@ try:
     from madalyalar import madalya_sayfasi_olustur
     from liste import liste_sayfasi_olustur
     from radyo import radyo_widget
-    from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
+    from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur # <-- YENİ MODÜL
 except ImportError as e:
     st.error(f"Modül hatası: {e}. Dosyaların eksiksiz olduğundan emin ol.")
     st.stop()
@@ -156,7 +156,7 @@ tanimlar = st.session_state['tanimlar']
 
 # --- ARAYÜZ ---
 st.title("🚙 Plaka Avı (BC Serisi)")
-radyo_widget() # <-- 2. EKLEME BURASI: Radyoyu burada çağırıyoruz.
+radyo_widget()
 st.markdown("---")
 
 admin_mode = False
@@ -239,11 +239,12 @@ with col1:
 
 # --- SAĞ KOLON (MODÜLLER) ---
 with col2:
-# 5 Sekmeli yapıya geçiyoruz
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "🎖️ Madalyalar", "📋 Liste", "🤝 Görülenler"])
-
-with tab1: liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
-with tab2: harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
-with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
-with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
-with tab5: etkilesim_sayfasi_olustur()
+    # 5 Sekmeli yapı: Her sekme için ilgili modülü çağırıyoruz
+    # DİKKAT: Buradaki kodlar "with col2:" bloğunun içinde olmalı (girintili)
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏆 Liderlik", "🗺️ Harita", "🎖️ Madalyalar", "📋 Liste", "🤝 Görülenler"])
+    
+    with tab1: liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
+    with tab2: harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
+    with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
+    with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
+    with tab5: etkilesim_sayfasi_olustur()
