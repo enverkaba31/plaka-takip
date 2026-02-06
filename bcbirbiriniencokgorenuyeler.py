@@ -1,12 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 def etkilesim_sayfasi_olustur():
     st.markdown("### 🤝 BC Reel'de Birbirini Görenler (Ekim 2025)")
     st.caption("Veri Kaynağı: 10.10.2025 Tarihli İstihbarat Raporu")
     
-    # 1. VERİ SETİ (PDF'ten alındı ve temizlendi)
+    # 1. VERİ SETİ
     data = [
         {"Üye": "Yaız Abi", "Skor": 9, "Gördükleri": ["Gökan Abi", "Eren Dizdar", "Kaan", "Enes", "MertEr", "Mert Amlı", "Enver", "Yiit", "Sado"]},
         {"Üye": "Gökan Abi", "Skor": 9, "Gördükleri": ["Eren Dizdar", "Kaan", "Enes", "Yaız Abi", "Sado", "Yiit", "Enver", "Baybora", "MMusa"]},
@@ -38,51 +39,89 @@ def etkilesim_sayfasi_olustur():
 
     st.divider()
 
-    # 3. GRAFİK (Bar Chart)
+    # 3. GRAFİK (Bar Chart - Daha Renkli)
     fig = px.bar(df.sort_values("Skor", ascending=True), 
                  x="Skor", y="Üye", 
                  orientation='h', 
-                 title="📊 Kim Kaç Kişiyi Gördü?",
+                 title="📊 Skor Tablosu",
                  text="Skor",
                  color="Skor",
-                 color_continuous_scale="Viridis")
+                 color_continuous_scale="Reds")
     fig.update_layout(showlegend=False, height=600)
     st.plotly_chart(fig, use_container_width=True)
 
-    # 4. KİM KİMİ GÖRDÜ MATRİSİ (Heatmap)
+    st.divider()
+
+    # 4. KİM KİMİ GÖRDÜ MATRİSİ (REVİZE EDİLDİ)
     st.subheader("🕵️ Kim Kimi Gördü Matrisi")
-    st.caption("Yeşil: Gördü | Siyah: Görmedi")
     
     # Tüm üyelerin listesi
     tum_uyeler = sorted([d["Üye"] for d in data])
     
-    # Matris verisini hazırla
-    matrix_data = []
+    # Matris verisini sayısal olarak hazırla
+    # 0: Görmedi (Koyu Gri)
+    # 1: Gördü (Yeşil)
+    # 0.2: Kendisi (Boşluk/Siyah)
+    
+    z_values = []
+    text_values = [] # Üzerine gelince yazacak yazı
+    
     for row_person in data:
-        row = []
+        z_row = []
+        text_row = []
         sahip = row_person["Üye"]
         gordukleri = row_person["Gördükleri"]
         
         for col_person in tum_uyeler:
             if sahip == col_person:
-                row.append(None) # Kendisi (Gri)
+                z_row.append(0.2) # Kendisi
+                text_row.append("Kendisi")
             elif col_person in gordukleri:
-                row.append(1) # Gördü (Yeşil)
+                z_row.append(1) # Gördü
+                text_row.append(f"{sahip} -> {col_person} GÖRDÜ")
             else:
-                row.append(0) # Görmedi (Siyah)
-        matrix_data.append(row)
+                z_row.append(0) # Görmedi
+                text_row.append("Görmedi")
         
-    # Heatmap Çiz
-    fig_matrix = px.imshow(matrix_data,
-                           x=tum_uyeler,
-                           y=[d["Üye"] for d in data],
-                           color_continuous_scale=["#111", "#00FF00"], # Siyah -> Yeşil
-                           aspect="auto")
-    fig_matrix.update_traces(showscale=False)
-    fig_matrix.update_layout(xaxis_nticks=len(tum_uyeler), height=600)
-    st.plotly_chart(fig_matrix, use_container_width=True)
-    
+        z_values.append(z_row)
+        text_values.append(text_row)
+        
+    # Heatmap Çiz (Custom Colors)
+    # Renk Skalası: 0 -> Koyu Gri, 0.2 -> Siyah, 1 -> Yeşil
+    colorscale = [
+        [0.0, 'rgb(40, 40, 40)'],   # Görmedi (Koyu Gri)
+        [0.2, 'rgb(0, 0, 0)'],      # Kendisi (Siyah)
+        [1.0, 'rgb(0, 255, 100)']   # Gördü (Parlak Yeşil)
+    ]
 
-    # 5. DETAYLI TABLO
+    fig_matrix = go.Figure(data=go.Heatmap(
+        z=z_values,
+        x=tum_uyeler,
+        y=[d["Üye"] for d in data],
+        text=text_values,
+        hoverinfo="text",
+        colorscale=colorscale,
+        showscale=False, # Yandaki renk çubuğunu gizle
+        xgap=1, # Kutucuklar arası boşluk (X ekseni)
+        ygap=1  # Kutucuklar arası boşluk (Y ekseni)
+    ))
+
+    fig_matrix.update_layout(
+        title="Etkileşim Grid'i",
+        xaxis_nticks=len(tum_uyeler), # Tüm isimleri göster
+        yaxis_nticks=len(data),       # Tüm isimleri göster
+        width=800,
+        height=800,
+        xaxis_side="top", # İsimleri yukarı al (daha rahat okunur)
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(tickangle=-45) # İsimleri biraz eğik yaz sığsın
+    )
+    
+    st.plotly_chart(fig_matrix, use_container_width=True)
+
+    # 5. DETAYLI TABLO (Genişletilebilir)
     with st.expander("📋 Detaylı Listeyi Gör"):
-        st.dataframe(df, use_container_width=True)
+        # Tabloyu daha şık hale getirelim
+        formatted_df = df.copy()
+        formatted_df["Gördükleri"] = formatted_df["Gördükleri"].apply(lambda x: ", ".join(x) if x else "-")
+        st.dataframe(formatted_df, use_container_width=True)
