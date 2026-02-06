@@ -4,8 +4,8 @@ import requests
 from datetime import date
 from github import Github
 
-# --- MODÜLLERİ İÇERİ AKTAR ---
 try:
+        from intro import intro_yap  # <-- YENİ EKLENEN
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
     from madalyalar import madalya_sayfasi_olustur
@@ -18,6 +18,12 @@ except ImportError as e:
 
 # --- GÜVENLİK VE AYARLAR ---
 st.set_page_config(page_title="BC Plaka Takip", page_icon="🚙", layout="wide")
+
+try:
+    from intro import intro_yap
+    intro_yap()
+except:
+    pass
 
 try:
     GITHUB_TOKEN = st.secrets["github"]["token"]
@@ -256,6 +262,7 @@ with col2:
     with tab3: madalya_sayfasi_olustur(tanimlar, madalyalar)
     with tab4: liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
     with tab5: etkilesim_sayfasi_olustur()
+
 
 
 
