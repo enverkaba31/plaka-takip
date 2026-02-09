@@ -336,9 +336,10 @@ with col2:
         madalya_sayfasi_olustur(tanimlar, madalyalar)
         
     with t4:
-        st.markdown("### 📋 Veri Dökümü")
+        st.markdown("###")
         liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
         
     with t5:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
+
