@@ -323,7 +323,6 @@ with col2:
         "🪪 Ajan Profili", 
         "🎖️ Madalyalar", 
         "🤝 Birbirini En Çok Görenler",
-        "💬 Sohbet"
     ]
     
     t0, t1, t2, t3, t4, t5, t6, t7 = st.tabs(tab_titles)
@@ -352,7 +351,5 @@ with col2:
 
     with t6:
         etkilesim_sayfasi_olustur()
-        
-    with t7:
-        sohbet_sayfasi()
+
 
