@@ -22,7 +22,6 @@ try:
     from radyo import radyo_widget
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
     from gazete import gazete_sayfasi_olustur
-    from sohbet import sohbet_sayfasi
     from profil import profil_sayfasi
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
@@ -356,3 +355,4 @@ with col2:
         
     with t7:
         sohbet_sayfasi()
+
