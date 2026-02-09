@@ -197,7 +197,7 @@ col1, col2 = st.columns([1, 3], gap="medium")
 # --- SIDEBAR: YÖNETİCİ PANELİ ---
 admin_mode = False
 with st.sidebar:
-    st.header("🔒 Yönetici Paneli")
+    st.header("🔒 NEK Paneli")
     
     # Giriş Paneli
     if st.text_input("🔑 Erişim Şifresi:", type="password") == YONETICI_SIFRESI:
@@ -342,6 +342,7 @@ with col2:
     with t5:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
+
 
 
 
