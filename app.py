@@ -22,7 +22,7 @@ try:
     from radyo import radyo_widget
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
     from gazete import gazete_sayfasi_olustur
-    from telsiz import telsiz_widget  # <-- YENİ EKLENDİ (TELSİZ)
+    from sohbet import sohbet_sayfasi  # <-- ARTIK SOHBET.PY ÇAĞIRILIYOR
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
     st.stop()
@@ -314,10 +314,10 @@ with col1:
 
 # --- SAĞ KOLON (VERİ MERKEZİ) ---
 with col2:
-    # 7 Sekmeli Yapı (Telsiz Eklendi)
+    # 7 Sekmeli Yapı (Telsiz yerine Sohbet Geldi)
     tab_titles = [
         "📰 BC Gazete",
-        "📻 Telsiz",       # <-- YENİ
+        "💬 Sohbet",       # <-- DEĞİŞTİ
         "🏆 Liderlik", 
         "🗺️ Harita", 
         "🎖️ Madalyalar", 
@@ -325,13 +325,13 @@ with col2:
         "🤝 Birbirini En Çok Görenler"
     ]
     
-    t0, t_telsiz, t1, t2, t3, t4, t5 = st.tabs(tab_titles)
+    t0, t_sohbet, t1, t2, t3, t4, t5 = st.tabs(tab_titles)
     
     with t0:
         gazete_sayfasi_olustur(plakalar, TURKIYE_VERISI)
 
-    with t_telsiz:
-        telsiz_widget() # <-- Telsiz fonksiyonu çağrılıyor
+    with t_sohbet:
+        sohbet_sayfasi() # <-- ARTIK SOHBET MODÜLÜ ÇAĞIRILIYOR
 
     with t1:
         st.markdown("###")
