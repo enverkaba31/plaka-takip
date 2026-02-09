@@ -23,7 +23,7 @@ try:
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
     from gazete import gazete_sayfasi_olustur
     from sohbet import sohbet_sayfasi
-    from profil import profil_sayfasi # <-- YENİ EKLENDİ (AJAN PROFİLİ)
+    from profil import profil_sayfasi
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
     st.stop()
@@ -315,45 +315,44 @@ with col1:
 
 # --- SAĞ KOLON (VERİ MERKEZİ) ---
 with col2:
-    # 8 Sekmeli Yapı (Profil Eklendi)
+    # 8 Sekmeli Yapı (Sıralama Güncellendi)
     tab_titles = [
-        "🪪 Ajan Profili", # <-- YENİ BAŞLIK
         "📰 BC Gazete",
-        "💬 Sohbet",
         "🏆 Liderlik", 
+        "📋 Detaylı Liste",
         "🗺️ Harita", 
+        "🪪 Ajan Profili", 
         "🎖️ Madalyalar", 
-        "📋 Detaylı Liste", 
-        "🤝 Birbirini En Çok Görenler"
+        "🤝 Birbirini En Çok Görenler",
+        "💬 Sohbet"
     ]
     
-    t_profil, t0, t_sohbet, t1, t2, t3, t4, t5 = st.tabs(tab_titles)
+    t0, t1, t2, t3, t4, t5, t6, t7 = st.tabs(tab_titles)
     
-    with t_profil: # PROFİL İÇERİĞİ
-        profil_sayfasi(avcilar, plakalar, madalyalar, tanimlar, TURKIYE_VERISI)
-
     with t0:
         gazete_sayfasi_olustur(plakalar, TURKIYE_VERISI)
-
-    with t_sohbet:
-        sohbet_sayfasi()
-
+        
     with t1:
         st.markdown("###")
         liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
         
     with t2:
+        st.markdown("###")
+        liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
+
+    with t3:
         st.markdown("### 🗺️ Operasyon Haritası")
         harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
 
-    with t3: 
+    with t4: 
+        profil_sayfasi(avcilar, plakalar, madalyalar, tanimlar, TURKIYE_VERISI)
+
+    with t5: 
         st.markdown("###")
         madalya_sayfasi_olustur(tanimlar, madalyalar)
-        
-    with t4:
-        st.markdown("###")
-        liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
-        
-    with t5:
-        # Etkileşim Grid'i
+
+    with t6:
         etkilesim_sayfasi_olustur()
+        
+    with t7:
+        sohbet_sayfasi()
