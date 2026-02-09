@@ -10,7 +10,7 @@ def madalya_sayfasi_olustur(tanimlar, madalya_sahipleri):
     """
     
     st.markdown("### 🎖️ Madalya ve Unvan Kataloğu")
-    st.caption("Bu rozetler, özel başarı gösteren avcılara Yönetici tarafından verilir.")
+    st.caption("Bu madalyalar, özel başarı gösteren avcılara NEK tarafından verilir.")
     st.divider()
 
     # Eğer tanımlar dosyası boşsa veya okunamazsa
