@@ -22,7 +22,8 @@ try:
     from radyo import radyo_widget
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
     from gazete import gazete_sayfasi_olustur
-    from sohbet import sohbet_sayfasi  # <-- ARTIK SOHBET.PY ÇAĞIRILIYOR
+    from sohbet import sohbet_sayfasi
+    from profil import profil_sayfasi # <-- YENİ EKLENDİ (AJAN PROFİLİ)
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
     st.stop()
@@ -314,10 +315,11 @@ with col1:
 
 # --- SAĞ KOLON (VERİ MERKEZİ) ---
 with col2:
-    # 7 Sekmeli Yapı (Telsiz yerine Sohbet Geldi)
+    # 8 Sekmeli Yapı (Profil Eklendi)
     tab_titles = [
+        "🪪 Ajan Profili", # <-- YENİ BAŞLIK
         "📰 BC Gazete",
-        "💬 Sohbet",       # <-- DEĞİŞTİ
+        "💬 Sohbet",
         "🏆 Liderlik", 
         "🗺️ Harita", 
         "🎖️ Madalyalar", 
@@ -325,13 +327,16 @@ with col2:
         "🤝 Birbirini En Çok Görenler"
     ]
     
-    t0, t_sohbet, t1, t2, t3, t4, t5 = st.tabs(tab_titles)
+    t_profil, t0, t_sohbet, t1, t2, t3, t4, t5 = st.tabs(tab_titles)
     
+    with t_profil: # PROFİL İÇERİĞİ
+        profil_sayfasi(avcilar, plakalar, madalyalar, tanimlar, TURKIYE_VERISI)
+
     with t0:
         gazete_sayfasi_olustur(plakalar, TURKIYE_VERISI)
 
     with t_sohbet:
-        sohbet_sayfasi() # <-- ARTIK SOHBET MODÜLÜ ÇAĞIRILIYOR
+        sohbet_sayfasi()
 
     with t1:
         st.markdown("###")
