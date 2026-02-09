@@ -17,10 +17,10 @@ try:
     from animasyon import intro_yap  
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
+    from madalyalar import madalya_sayfasi_olustur # Burası aktif
     from liste import liste_sayfasi_olustur
     from radyo import radyo_widget
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
-    # Madalya sayfası modülü artık çağrılmıyor
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
     st.stop()
@@ -220,7 +220,6 @@ with st.sidebar:
                 github_update_json(FILES["avci"], avcilar, "Ajan silindi")
                 st.rerun()
 
-        # Madalya verme yetkisi burada durabilir ama sekme kaldırıldı
         with st.expander("🎖️ Madalya Dağıtım"):
             if avcilar:
                 kime = st.selectbox("Kime:", avcilar)
@@ -238,6 +237,18 @@ with st.sidebar:
                         madalyalar[kime].remove(ne)
                         github_update_json(FILES["madalya"], madalyalar)
                         st.rerun()
+        
+        # --- GERİ GETİRİLDİ: YENİ MADALYA EKLEME ---
+        with st.expander("📝 Yeni Madalya Tasarla"):
+            m_ad = st.text_input("Madalya İsmi:")
+            m_ikon = st.text_input("İkon (Emoji):", value="🏅")
+            m_desc = st.text_input("Açıklama:")
+            if st.button("Envantere Ekle"):
+                if m_ad:
+                    tanimlar[m_ad] = {"ikon": m_ikon, "desc": m_desc}
+                    github_update_json(FILES["tanim"], tanimlar, "Yeni madalya")
+                    st.rerun()
+
     else:
         st.info("Sadece yetkili personel.")
 
@@ -301,15 +312,16 @@ with col1:
 
 # --- SAĞ KOLON (VERİ MERKEZİ) ---
 with col2:
-    # 4 Sekmeli Yapı (Madalyalar Kaldırıldı)
+    # 5 Sekmeli Yapı (Madalyalar Geri Getirildi)
     tab_titles = [
         "🏆 Liderlik", 
         "🗺️ Harita", 
+        "🎖️ Madalyalar", # Geri geldi
         "📋 Detaylı Liste", 
         "🤝 Birbirini En Çok Görenler"
     ]
     
-    t1, t2, t3, t4 = st.tabs(tab_titles)
+    t1, t2, t3, t4, t5 = st.tabs(tab_titles)
     
     with t1:
         st.markdown("### 📊 Anlık Puan Durumu")
@@ -318,13 +330,15 @@ with col2:
     with t2:
         st.markdown("### 🗺️ Operasyon Haritası")
         harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
+
+    with t3: # Madalya Sayfası Eklendi
+        st.markdown("### 🎖️ Madalya Envanteri")
+        madalya_sayfasi_olustur(tanimlar, madalyalar)
         
-    with t3:
+    with t4:
         st.markdown("### 📋 Veri Dökümü")
         liste_sayfasi_olustur(plakalar, TURKIYE_VERISI)
         
-    with t4:
+    with t5:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
-
-
