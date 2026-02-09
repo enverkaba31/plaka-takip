@@ -17,10 +17,11 @@ try:
     from animasyon import intro_yap  
     from liderlik import liderlik_tablosu_olustur
     from harita import harita_sayfasi_olustur
-    from madalyalar import madalya_sayfasi_olustur # Burası aktif
+    from madalyalar import madalya_sayfasi_olustur 
     from liste import liste_sayfasi_olustur
     from radyo import radyo_widget
     from bcbirbiriniencokgorenuyeler import etkilesim_sayfasi_olustur
+    from gazete import gazete_sayfasi_olustur  # <-- YENİ EKLENDİ
 except ImportError as e:
     st.error(f"🚨 KRİTİK HATA: Modüller eksik! ({e})")
     st.stop()
@@ -312,17 +313,21 @@ with col1:
 
 # --- SAĞ KOLON (VERİ MERKEZİ) ---
 with col2:
-    # 5 Sekmeli Yapı (Madalyalar Geri Getirildi)
+    # 6 Sekmeli Yapı (Gazete Eklendi)
     tab_titles = [
+        "📰 BC Gazete", # <-- YENİ EKLENDİ
         "🏆 Liderlik", 
         "🗺️ Harita", 
-        "🎖️ Madalyalar", # Geri geldi
+        "🎖️ Madalyalar", 
         "📋 Detaylı Liste", 
         "🤝 Birbirini En Çok Görenler"
     ]
     
-    t1, t2, t3, t4, t5 = st.tabs(tab_titles)
+    t0, t1, t2, t3, t4, t5 = st.tabs(tab_titles)
     
+    with t0: # GAZETE SEKME İÇERİĞİ
+        gazete_sayfasi_olustur(plakalar, TURKIYE_VERISI)
+
     with t1:
         st.markdown("###")
         liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
@@ -331,7 +336,7 @@ with col2:
         st.markdown("### 🗺️ Operasyon Haritası")
         harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
 
-    with t3: # Madalya Sayfası Eklendi
+    with t3: 
         st.markdown("###")
         madalya_sayfasi_olustur(tanimlar, madalyalar)
         
@@ -342,7 +347,3 @@ with col2:
     with t5:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
-
-
-
-
