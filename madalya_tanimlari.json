@@ -58,5 +58,9 @@
     "Threesome": {
         "ikon": "3️⃣",
         "desc": "3 ardışık plakayı gördün."
+    },
+    "Gurbetçi": {
+        "ikon": "🤠",
+        "desc": "Yabancı BC plaka gördün."
     }
 }
