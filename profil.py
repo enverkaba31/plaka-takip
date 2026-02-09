@@ -4,109 +4,109 @@ from collections import Counter
 def profil_sayfasi(avcilar, plakalar, madalyalar, tanimlar, turkiye_verisi):
     # CSS Stil Tanımları
     st.markdown("""
-    <style>
-        .id-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            border: 2px solid #444;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            position: relative;
-            overflow: hidden;
-            color: white;
-            font-family: sans-serif;
-            margin-bottom: 20px;
-        }
-        .id-header {
-            border-bottom: 2px solid #FF4B4B;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .agent-name {
-            font-size: 32px;
-            font-weight: 900;
-            color: #FFF;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .agent-rank {
-            font-size: 18px;
-            color: #FFD700;
-            font-weight: bold;
-            font-family: monospace;
-        }
-        .info-grid {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        .info-left {
-            flex: 1;
-        }
-        .info-right {
-            flex: 1;
-            text-align: right;
-            font-size: 60px;
-        }
-        .stats-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-        }
-        .stat-box {
-            background-color: #333;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .stat-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #FF4B4B;
-        }
-        .stat-label {
-            font-size: 12px;
-            color: #aaa;
-            text-transform: uppercase;
-        }
-        .badge-container {
-            margin-top: 20px;
-        }
-        .badge-title {
-            color: #FFD700;
-            font-weight: bold;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #444;
-        }
-        .badge-grid {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        .badge-item {
-            background: #222;
-            padding: 8px;
-            border-radius: 50%;
-            font-size: 24px;
-            border: 1px solid #555;
-            cursor: help;
-        }
-        .stamp {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: rgba(255, 255, 255, 0.05);
-            font-size: 80px;
-            font-weight: 900;
-            transform: rotate(-30deg);
-            pointer-events: none;
-            z-index: 0;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+<style>
+    .id-card {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        border: 2px solid #444;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        position: relative;
+        overflow: hidden;
+        color: white;
+        font-family: sans-serif;
+        margin-bottom: 20px;
+    }
+    .id-header {
+        border-bottom: 2px solid #FF4B4B;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .agent-name {
+        font-size: 32px;
+        font-weight: 900;
+        color: #FFF;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .agent-rank {
+        font-size: 18px;
+        color: #FFD700;
+        font-weight: bold;
+        font-family: monospace;
+    }
+    .info-grid {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    .info-left {
+        flex: 1;
+    }
+    .info-right {
+        flex: 1;
+        text-align: right;
+        font-size: 60px;
+    }
+    .stats-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+    }
+    .stat-box {
+        background-color: #333;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #FF4B4B;
+    }
+    .stat-label {
+        font-size: 12px;
+        color: #aaa;
+        text-transform: uppercase;
+    }
+    .badge-container {
+        margin-top: 20px;
+    }
+    .badge-title {
+        color: #FFD700;
+        font-weight: bold;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #444;
+    }
+    .badge-grid {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .badge-item {
+        background: #222;
+        padding: 8px;
+        border-radius: 50%;
+        font-size: 24px;
+        border: 1px solid #555;
+        cursor: help;
+    }
+    .stamp {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        color: rgba(255, 255, 255, 0.05);
+        font-size: 80px;
+        font-weight: 900;
+        transform: rotate(-30deg);
+        pointer-events: none;
+        z-index: 0;
+    }
+</style>
+""", unsafe_allow_html=True)
 
     # 1. AJAN SEÇİMİ
     col_sel, col_info = st.columns([1, 3])
@@ -153,53 +153,49 @@ def profil_sayfasi(avcilar, plakalar, madalyalar, tanimlar, turkiye_verisi):
     else:
         badges_html = "<span style='color:#666; font-size:12px;'>Henüz madalya yok.</span>"
 
-    # 3. HTML KART OLUŞTURMA (Hatasız)
+    # 3. HTML KART OLUŞTURMA (DİKKAT: SOLA YAPIŞIK YAZIYORUZ)
     card_html = f"""
-    <div class="id-card">
-        <div class="stamp">GİZLİ</div>
-        
-        <div class="id-header">
-            <div class="agent-name">{secilen_avci}</div>
-            <div class="agent-rank">{rutbe}</div>
-        </div>
-        
-        <div class="info-grid">
-            <div class="info-left">
-                <div style="color: #aaa; font-size: 14px; margin-bottom: 5px;">👤 PERSONEL KİMLİĞİ</div>
-                <div style="color: #fff; font-family: monospace; line-height: 1.5;">
-                    KOD ADI: <span style="color: #FF4B4B;">{secilen_avci.upper()}</span><br>
-                    GÖREV YERİ: {fav_bolge.upper()} BÖLGESİ<br>
-                    DURUMU: <span style="color: #00FF00;">AKTİF</span>
-                </div>
-            </div>
-            <div class="info-right">
-                🕵️‍♂️
+<div class="id-card">
+    <div class="stamp">GİZLİ</div>
+    <div class="id-header">
+        <div class="agent-name">{secilen_avci}</div>
+        <div class="agent-rank">{rutbe}</div>
+    </div>
+    <div class="info-grid">
+        <div class="info-left">
+            <div style="color: #aaa; font-size: 14px; margin-bottom: 5px;">👤 PERSONEL KİMLİĞİ</div>
+            <div style="color: #fff; font-family: monospace; line-height: 1.5;">
+                KOD ADI: <span style="color: #FF4B4B;">{secilen_avci.upper()}</span><br>
+                GÖREV YERİ: {fav_bolge.upper()} BÖLGESİ<br>
+                DURUMU: <span style="color: #00FF00;">AKTİF</span>
             </div>
         </div>
-
-        <div class="stats-container">
-            <div class="stat-box">
-                <div class="stat-value">{toplam_av}</div>
-                <div class="stat-label">TOPLAM İNFAZ</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">{len(set(my_regions))}</div>
-                <div class="stat-label">FETHEDİLEN BÖLGE</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-value">{len(sahip_olunanlar)}</div>
-                <div class="stat-label">MADALYA</div>
-            </div>
-        </div>
-
-        <div class="badge-container">
-            <div class="badge-title">🏅 ONUR NİŞANLARI</div>
-            <div class="badge-grid">
-                {badges_html}
-            </div>
+        <div class="info-right">
+            🕵️‍♂️
         </div>
     </div>
-    """
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-value">{toplam_av}</div>
+            <div class="stat-label">TOPLAM İNFAZ</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{len(set(my_regions))}</div>
+            <div class="stat-label">FETHEDİLEN BÖLGE</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-value">{len(sahip_olunanlar)}</div>
+            <div class="stat-label">MADALYA</div>
+        </div>
+    </div>
+    <div class="badge-container">
+        <div class="badge-title">🏅 ONUR NİŞANLARI</div>
+        <div class="badge-grid">
+            {badges_html}
+        </div>
+    </div>
+</div>
+"""
     
     # HTML'i Render Et
     st.markdown(card_html, unsafe_allow_html=True)
