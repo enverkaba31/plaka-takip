@@ -207,17 +207,17 @@ with st.sidebar:
         
         # Admin İşlemleri
         with st.expander("👤 Personel İşleri"):
-            yeni_isim = st.text_input("Ajan Ekle:")
+            yeni_isim = st.text_input("Avcı Ekle:")
             if st.button("Kaydı Tamamla"):
                 if yeni_isim and yeni_isim not in avcilar:
                     avcilar.append(yeni_isim)
-                    github_update_json(FILES["avci"], avcilar, "Yeni ajan")
+                    github_update_json(FILES["avci"], avcilar, "Yeni Avcı")
                     st.rerun()
             
-            silinecek = st.selectbox("Ajan Sil:", avcilar, index=None)
+            silinecek = st.selectbox("Avcı Sil:", avcilar, index=None)
             if st.button("İlişiği Kes") and silinecek:
                 avcilar.remove(silinecek)
-                github_update_json(FILES["avci"], avcilar, "Ajan silindi")
+                github_update_json(FILES["avci"], avcilar, "Avcı silindi")
                 st.rerun()
 
         with st.expander("🎖️ Madalya Dağıtım"):
@@ -273,7 +273,7 @@ with col1:
             st.success("GÖREV TAMAMLANDI! TÜM PLAKALAR BULUNDU! 🏆")
         else:
             if not avcilar:
-                st.error("Önce ajan ekleyin!")
+                st.error("Önce avcı ekleyin!")
             else:
                 with st.form("kayit_formu", border=True):
                     secilen_plaka = st.selectbox("Hedef Plaka:", boslar, format_func=lambda x: f"{x} - {TURKIYE_VERISI.get(x,{}).get('il','?')}")
@@ -342,5 +342,6 @@ with col2:
     with t5:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
+
 
 
