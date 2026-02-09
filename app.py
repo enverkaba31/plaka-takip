@@ -324,7 +324,7 @@ with col2:
     t1, t2, t3, t4, t5 = st.tabs(tab_titles)
     
     with t1:
-        st.markdown("### 📊 Anlık Puan Durumu")
+        st.markdown("###")
         liderlik_tablosu_olustur(avcilar, plakalar, madalyalar, tanimlar, PLAKA_SAYISI)
         
     with t2:
@@ -332,7 +332,7 @@ with col2:
         harita_sayfasi_olustur(plakalar, avcilar, TURKIYE_VERISI, BOLGE_MERKEZLERI, RENK_PALETI, GEOJSON_URL)
 
     with t3: # Madalya Sayfası Eklendi
-        st.markdown("### 🎖️ Madalya Envanteri")
+        st.markdown("###")
         madalya_sayfasi_olustur(tanimlar, madalyalar)
         
     with t4:
@@ -342,4 +342,5 @@ with col2:
     with t5:
         # Etkileşim Grid'i
         etkilesim_sayfasi_olustur()
+
 
