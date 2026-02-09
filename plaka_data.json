@@ -119,7 +119,13 @@
     },
     "62": null,
     "63": null,
-    "64": null,
+    "64": {
+        "sahibi": "Kaan",
+        "tarih": "09/02/2026",
+        "tam_plaka": "64 BC 311",
+        "plaka_sonu": "311",
+        "not": ""
+    },
     "65": null,
     "66": null,
     "67": null,
