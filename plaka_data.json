@@ -123,7 +123,13 @@
     "71": null,
     "72": null,
     "73": null,
-    "74": null,
+    "74": {
+        "sahibi": "Kaan",
+        "tarih": "09/02/2026",
+        "tam_plaka": "74 BC",
+        "plaka_sonu": "",
+        "not": ""
+    },
     "75": null,
     "76": null,
     "77": {
