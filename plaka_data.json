@@ -34,7 +34,13 @@
         "tam_plaka": "14 BC 566",
         "plaka_sonu": "566"
     },
-    "15": null,
+    "15": {
+        "sahibi": "Kaan",
+        "tarih": "09/02/2026",
+        "tam_plaka": "15 BC 078",
+        "plaka_sonu": "078",
+        "not": "Levazım'da görüldü."
+    },
     "16": null,
     "17": null,
     "18": null,
