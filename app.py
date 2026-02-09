@@ -325,7 +325,7 @@ with col2:
         "🤝 Birbirini En Çok Görenler",
     ]
     
-    t0, t1, t2, t3, t4, t5, t6, t7 = st.tabs(tab_titles)
+    t0, t1, t2, t3, t4, t5, t6 = st.tabs(tab_titles)
     
     with t0:
         gazete_sayfasi_olustur(plakalar, TURKIYE_VERISI)
@@ -351,5 +351,6 @@ with col2:
 
     with t6:
         etkilesim_sayfasi_olustur()
+
 
 
