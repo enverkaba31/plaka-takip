@@ -4,7 +4,7 @@ import random
 
 def radyo_widget():
     # 1. Klasör Ayarları
-    MUZIK_KLASORU = "muzikler"
+    MUZIK_KLASORU = "muzik"
     
     # Klasör yoksa uyarı ver ve çık
     if not os.path.exists(MUZIK_KLASORU):
