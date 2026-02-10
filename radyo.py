@@ -1,107 +1,50 @@
 import streamlit as st
 import os
-import base64
-import streamlit.components.v1 as components
+import random
 
 def radyo_widget():
     """
-    Kalıcı Radyo - Otomatik Başlatma Garantili Versiyon
+    Klasördeki müzikleri tarar ve rastgele birini çalar.
+    Şarkı değişmemesi için (sayfa yenilenmedikçe) session_state kullanır.
     """
-    # 1. Klasör ve Dosya Kontrolü
-    folder_name = "muzik"
-    current_dir = os.getcwd()
-    target_path = os.path.join(current_dir, folder_name)
-
-    # Klasör yoksa oluştur
-    if not os.path.exists(target_path):
-        os.makedirs(target_path)
     
-    # Şarkıları bul
-    try:
-        sarkilar = [f for f in os.listdir(target_path) if f.endswith(('.mp3', '.wav', '.ogg'))]
-    except:
-        sarkilar = []
+    # 1. Müzik Klasörü Kontrolü
+    MUZIK_KLASORU = "muzikler"
+    
+    if not os.path.exists(MUZIK_KLASORU):
+        os.makedirs(MUZIK_KLASORU)
+        st.warning(f"⚠️ '{MUZIK_KLASORU}' klasörü yoktu, oluşturdum. İçine MP3 atın!")
+        return
 
+    # Klasördeki mp3 dosyalarını listele
+    sarkilar = [f for f in os.listdir(MUZIK_KLASORU) if f.endswith(('.mp3', '.wav', '.ogg'))]
+    
     if not sarkilar:
-        # Eğer şarkı yoksa boş bir alan gösterip çık, hata verme
+        st.info(f"📻 Radyo sessiz... '{MUZIK_KLASORU}' klasörüne şarkı yükle.")
         return
 
-    # 2. Arayüz (Şarkı Seçimi)
-    # Burası Streamlit tarafında şarkı seçmek için
-    secilen_sarki = st.selectbox("📻 Radyo Frekansı:", sarkilar, index=0, label_visibility="collapsed")
-    
-    file_path = os.path.join(target_path, secilen_sarki)
+    # 2. Şarkı Seçimi (Session State ile Hafızada Tutma)
+    # Eğer hafızada seçili şarkı yoksa VEYA 'sonraki_sarki' butonuna basıldıysa yeni seç
+    if 'calan_sarki' not in st.session_state or st.session_state.get('sarki_degistir', False):
+        secilen = random.choice(sarkilar)
+        st.session_state['calan_sarki'] = secilen
+        st.session_state['sarki_degistir'] = False # Bayrağı indir
 
-    # 3. Dosyayı Oku ve Kodla
-    try:
-        with open(file_path, "rb") as f:
-            data = f.read()
-            b64 = base64.b64encode(data).decode()
-            mime_type = "audio/mp3"
-    except:
-        return
+    secilen_sarki = st.session_state['calan_sarki']
+    dosya_yolu = os.path.join(MUZIK_KLASORU, secilen_sarki)
 
-    # 4. JAVASCRIPT OYNATICI (SİHİRLİ KISIM)
-    html_code = f"""
-    <script>
-        // Oynatıcıyı bul veya yarat
-        var audioPlayer = window.parent.document.getElementById("persistent-audio-player");
-
-        if (!audioPlayer) {{
-            audioPlayer = document.createElement('audio');
-            audioPlayer.id = "persistent-audio-player";
-            audioPlayer.controls = true;
+    # 3. Arayüz (Player + Değiştir Butonu)
+    with st.container():
+        c1, c2 = st.columns([3, 1])
+        
+        with c1:
+            st.markdown(f"🎵 **Şu an Çalıyor:** {secilen_sarki[:-4]}") # .mp3 uzantısını gizle
+            st.audio(dosya_yolu, format="audio/mp3")
             
-            // Görünüm ayarları (Sağ Alt Köşe)
-            audioPlayer.style.position = "fixed";
-            audioPlayer.style.bottom = "10px";
-            audioPlayer.style.right = "10px";
-            audioPlayer.style.zIndex = "9999";
-            audioPlayer.style.width = "250px";
-            audioPlayer.style.borderRadius = "20px";
-            audioPlayer.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.5)";
-            
-            // Özellikler
-            audioPlayer.autoplay = true;
-            audioPlayer.loop = true;
-            audioPlayer.volume = 0.5; // Ses seviyesi %50 başlasın (Çok bağırmasın)
-            
-            window.parent.document.body.appendChild(audioPlayer);
-        }}
-
-        // Şarkı değiştiyse kaynağı güncelle
-        var currentSource = audioPlayer.getAttribute("data-source-name");
-        var newSourceName = "{secilen_sarki}";
-
-        if (currentSource !== newSourceName) {{
-            audioPlayer.src = "data:{mime_type};base64,{b64}";
-            audioPlayer.setAttribute("data-source-name", newSourceName);
-        }}
-
-        // --- OTOMATİK BAŞLATMA ZORLAYICI ---
-        var playPromise = audioPlayer.play();
-
-        if (playPromise !== undefined) {{
-            playPromise.then(_ => {{
-                // Otomatik başladı, süper!
-                console.log("Müzik başladı.");
-            }}).catch(error => {{
-                // Tarayıcı engelledi! Pusuya yatıyoruz.
-                console.log("Otomatik oynatma engellendi. Tıklama bekleniyor...");
-                
-                // Kullanıcı sayfada HERHANGİ BİR YERE tıkladığı an çalıştır
-                var startAudio = function() {{
-                    audioPlayer.play();
-                    // Bir kere çalıştıktan sonra bu dinleyiciyi kaldır (Tekrar tekrar çalışmasın)
-                    window.parent.document.removeEventListener('click', startAudio);
-                    window.parent.document.removeEventListener('keydown', startAudio);
-                }};
-
-                window.parent.document.addEventListener('click', startAudio);
-                window.parent.document.addEventListener('keydown', startAudio);
-            }});
-        }}
-    </script>
-    """
-    
-    components.html(html_code, height=0)
+        with c2:
+            st.write("") # Hizalama boşluğu
+            st.write("") 
+            # Bu butona basınca state'i güncelliyoruz, sayfa yenileniyor ve yeni şarkı seçiyor
+            if st.button("Sıradaki ⏭️"):
+                st.session_state['sarki_degistir'] = True
+                st.rerun()
