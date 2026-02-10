@@ -3,48 +3,49 @@ import os
 import random
 
 def radyo_widget():
-    """
-    Klasördeki müzikleri tarar ve rastgele birini çalar.
-    Şarkı değişmemesi için (sayfa yenilenmedikçe) session_state kullanır.
-    """
-    
-    # 1. Müzik Klasörü Kontrolü
+    # 1. Klasör Ayarları
     MUZIK_KLASORU = "muzikler"
     
+    # Klasör yoksa uyarı ver ve çık
     if not os.path.exists(MUZIK_KLASORU):
-        os.makedirs(MUZIK_KLASORU)
-        st.warning(f"⚠️ '{MUZIK_KLASORU}' klasörü yoktu, oluşturdum. İçine MP3 atın!")
+        st.warning(f"⚠️ '{MUZIK_KLASORU}' klasörü bulunamadı. Lütfen oluşturun.")
         return
 
-    # Klasördeki mp3 dosyalarını listele
+    # Müzik dosyalarını çek
     sarkilar = [f for f in os.listdir(MUZIK_KLASORU) if f.endswith(('.mp3', '.wav', '.ogg'))]
     
     if not sarkilar:
-        st.info(f"📻 Radyo sessiz... '{MUZIK_KLASORU}' klasörüne şarkı yükle.")
+        st.info("Radio Silent... 📻 (Klasör boş)")
         return
 
-    # 2. Şarkı Seçimi (Session State ile Hafızada Tutma)
-    # Eğer hafızada seçili şarkı yoksa VEYA 'sonraki_sarki' butonuna basıldıysa yeni seç
-    if 'calan_sarki' not in st.session_state or st.session_state.get('sarki_degistir', False):
-        secilen = random.choice(sarkilar)
-        st.session_state['calan_sarki'] = secilen
-        st.session_state['sarki_degistir'] = False # Bayrağı indir
-
-    secilen_sarki = st.session_state['calan_sarki']
-    dosya_yolu = os.path.join(MUZIK_KLASORU, secilen_sarki)
-
-    # 3. Arayüz (Player + Değiştir Butonu)
+    # 2. Session State Yönetimi (Hafıza)
+    # Eğer daha önce bir şarkı seçilmediyse veya 'degistir' komutu geldiyse yeni seç
+    if 'calan_sarki' not in st.session_state:
+        st.session_state['calan_sarki'] = random.choice(sarkilar)
+    
+    # 3. Arayüz
+    secilen = st.session_state['calan_sarki']
+    dosya_yolu = os.path.join(MUZIK_KLASORU, secilen)
+    
     with st.container():
+        # Başlık ve Buton Yan Yana
         c1, c2 = st.columns([3, 1])
         
         with c1:
-            st.markdown(f"🎵 **Şu an Çalıyor:** {secilen_sarki[:-4]}") # .mp3 uzantısını gizle
+            st.markdown(f"### 📻 {secilen}")
+            # Audio player
             st.audio(dosya_yolu, format="audio/mp3")
             
         with c2:
-            st.write("") # Hizalama boşluğu
-            st.write("") 
-            # Bu butona basınca state'i güncelliyoruz, sayfa yenileniyor ve yeni şarkı seçiyor
-            if st.button("Sıradaki ⏭️"):
-                st.session_state['sarki_degistir'] = True
+            st.write("") # Hizalama için boşluk
+            st.write("")
+            # Bu butona basınca şarkıyı hafızadan silip sayfayı yeniliyoruz
+            # Böylece yukarıdaki 'if' bloğu tekrar çalışıp yeni rastgele şarkı seçiyor.
+            if st.button("Kanal Değiştir ⏭️"):
+                yeni_sarki = random.choice(sarkilar)
+                # Aynı şarkının gelmesini engellemek için basit döngü
+                while len(sarkilar) > 1 and yeni_sarki == st.session_state['calan_sarki']:
+                    yeni_sarki = random.choice(sarkilar)
+                
+                st.session_state['calan_sarki'] = yeni_sarki
                 st.rerun()
