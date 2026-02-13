@@ -98,7 +98,13 @@
     "45": null,
     "46": null,
     "47": null,
-    "48": null,
+    "48": {
+        "sahibi": "Kaan",
+        "tarih": "13/02/2026",
+        "tam_plaka": "48 BC 161",
+        "plaka_sonu": "161",
+        "not": ""
+    },
     "49": null,
     "50": null,
     "51": null,
