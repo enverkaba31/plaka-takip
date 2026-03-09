@@ -100,7 +100,13 @@
     },
     "42": null,
     "43": null,
-    "44": null,
+    "44": {
+        "sahibi": "Kaan",
+        "tarih": "09/03/2026",
+        "tam_plaka": "44 BC 120",
+        "plaka_sonu": "120",
+        "not": "Hadımköy"
+    },
     "45": null,
     "46": null,
     "47": null,
