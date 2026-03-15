@@ -48,7 +48,13 @@
     "20": null,
     "21": null,
     "22": null,
-    "23": null,
+    "23": {
+        "sahibi": "Nurullah",
+        "tarih": "15/03/2026",
+        "tam_plaka": "23 BC 088",
+        "plaka_sonu": "088",
+        "not": "Çengelköy’de park ettikten sonra görüldü"
+    },
     "24": null,
     "25": null,
     "26": {
