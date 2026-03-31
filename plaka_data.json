@@ -53,7 +53,13 @@
     "19": null,
     "20": null,
     "21": null,
-    "22": null,
+    "22": {
+        "sahibi": "Nurullah",
+        "tarih": "31/03/2026",
+        "tam_plaka": "22 BC 167",
+        "plaka_sonu": "167",
+        "not": "A180’in siftah günü Kadıköy E5 yolunda görüldü. "
+    },
     "23": {
         "sahibi": "Nurullah",
         "tarih": "15/03/2026",
