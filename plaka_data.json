@@ -119,7 +119,13 @@
         "tam_plaka": "37 BC",
         "plaka_sonu": ""
     },
-    "38": null,
+    "38": {
+        "sahibi": "Kaan",
+        "tarih": "02/05/2026",
+        "tam_plaka": "38 BC 466",
+        "plaka_sonu": "466",
+        "not": "Şam konser dönüşü görüldü. mercedes"
+    },
     "39": {
         "sahibi": "Nurullah",
         "tarih": "24/01/2026",
