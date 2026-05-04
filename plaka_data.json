@@ -105,7 +105,13 @@
         "tam_plaka": "34 BC 4166",
         "plaka_sonu": "4166"
     },
-    "35": null,
+    "35": {
+        "sahibi": "Gökhan Abi",
+        "tarih": "30/04/2026",
+        "tam_plaka": "35 BC 522",
+        "plaka_sonu": "522",
+        "not": "Artık asker değilim"
+    },
     "36": null,
     "37": {
         "sahibi": "Nurullah",
