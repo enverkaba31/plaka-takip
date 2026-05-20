@@ -161,7 +161,13 @@
     },
     "49": null,
     "50": null,
-    "51": null,
+    "51": {
+        "sahibi": "Kaan",
+        "tarih": "20/05/2026",
+        "tam_plaka": "51 BC",
+        "plaka_sonu": "",
+        "not": "15 temmuz köprüsü"
+    },
     "52": null,
     "53": null,
     "54": null,
