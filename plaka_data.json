@@ -176,7 +176,13 @@
     },
     "52": null,
     "53": null,
-    "54": null,
+    "54": {
+        "sahibi": "Nurullah",
+        "tarih": "12/06/2026",
+        "tam_plaka": "54 BC 247",
+        "plaka_sonu": "247",
+        "not": "Artı muhasebe çıkışı görüldü. Nissan Micra Kırmızı"
+    },
     "55": {
         "sahibi": "Gökhan Abi",
         "tarih": "04/04/2026",
