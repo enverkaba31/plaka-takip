@@ -160,7 +160,13 @@
         "not": ""
     },
     "49": null,
-    "50": null,
+    "50": {
+        "sahibi": "Nurullah",
+        "tarih": "14/06/2026",
+        "tam_plaka": "50 BC 804",
+        "plaka_sonu": "804",
+        "not": "Bursa'da görüldü. Tofaş Şahin"
+    },
     "51": {
         "sahibi": "Kaan",
         "tarih": "20/05/2026",
