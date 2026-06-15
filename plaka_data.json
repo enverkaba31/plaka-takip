@@ -1,5 +1,11 @@
 {
-    "01": null,
+    "01": {
+        "sahibi": "Nurullah",
+        "tarih": "12/06/2026",
+        "tam_plaka": "01 BC 247",
+        "plaka_sonu": "247",
+        "not": "Artı muhasebe iş çıkışı görüldü. Nissan Micra Kırmızı."
+    },
     "02": {
         "sahibi": "Kaan",
         "tarih": "26/01/2026",
