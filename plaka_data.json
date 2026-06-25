@@ -150,7 +150,13 @@
         "not": "Hadımköy"
     },
     "45": null,
-    "46": null,
+    "46": {
+        "sahibi": "Nurullah",
+        "tarih": "23/06/2026",
+        "tam_plaka": "46 BC 278",
+        "plaka_sonu": "278",
+        "not": "Sedeftepe sitesinde görüldü."
+    },
     "47": null,
     "48": {
         "sahibi": "Kaan",
