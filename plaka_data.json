@@ -247,7 +247,13 @@
         "not": "Zorlu otopark"
     },
     "71": null,
-    "72": null,
+    "72": {
+        "sahibi": "Yiit",
+        "tarih": "01/10/2026",
+        "tam_plaka": "72 BC 081",
+        "plaka_sonu": "081",
+        "not": ""
+    },
     "73": null,
     "74": {
         "sahibi": "Kaan",
