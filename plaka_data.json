@@ -30,7 +30,13 @@
         "not": "Ankara'da görüldü. BMW 216D"
     },
     "09": null,
-    "10": null,
+    "10": {
+        "sahibi": "Nurullah",
+        "tarih": "15/10/2026",
+        "tam_plaka": "10 BC 081",
+        "plaka_sonu": "081",
+        "not": "Başakşehir yolu"
+    },
     "11": null,
     "12": null,
     "13": null,
