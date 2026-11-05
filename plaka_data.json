@@ -240,7 +240,13 @@
         "plaka_sonu": "311",
         "not": ""
     },
-    "65": null,
+    "65": {
+        "sahibi": "Kaan",
+        "tarih": "01/11/2026",
+        "tam_plaka": "65 BC 402",
+        "plaka_sonu": "402",
+        "not": ""
+    },
     "66": null,
     "67": null,
     "68": null,
