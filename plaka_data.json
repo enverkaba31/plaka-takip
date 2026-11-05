@@ -55,7 +55,13 @@
         "not": "Şükür kavuşturana"
     },
     "17": null,
-    "18": null,
+    "18": {
+        "sahibi": "Nurullah",
+        "tarih": "27/09/2026",
+        "tam_plaka": "18 BC 017",
+        "plaka_sonu": "017",
+        "not": ""
+    },
     "19": null,
     "20": null,
     "21": null,
