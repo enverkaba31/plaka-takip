@@ -266,6 +266,12 @@
     },
     "78": null,
     "79": null,
-    "80": null,
+    "80": {
+        "sahibi": "Kaan",
+        "tarih": "23/10/2026",
+        "tam_plaka": "80 BC 177",
+        "plaka_sonu": "177",
+        "not": ""
+    },
     "81": null
 }
